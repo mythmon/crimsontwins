@@ -4,18 +4,18 @@ now.ready(function() {
   now.setUrl = function(url) {
     console.log('Loading url in iframe');
     $('#container').html(
-      $('iframe', {src: url})
+      $('<iframe>', {src: url})
     );
   };
 
   now.setImage = function(url) {
     console.log('Loading image');
     $('#container').html(
-      $('<img/>', {src: url})
+      $('<div class="imgbg"/>').css({
+        'background-image': 'url(' + url + ')'
+      })
     );
   };
-
-  ready('now');
 });
 
 function resize() {
@@ -28,28 +28,7 @@ function resize() {
 $(function() {
   $(window).on('resize', resize);
   resize();
-
-  ready('dom');
 });
 
-
-var readyComponents = ['dom', 'now'];
-
-function ready(component) {
-  console.log(component + ' ready');
-  var index = readyComponents.indexOf(component);
-  if (index >= 0) {
-    readyComponents.splice(index, 1);
-  }
-
-  if (!readyComponents.length) {
-    console.log('all ready');
-    allReady();
-  }
-}
-
-function allReady() {
-  now.imready();
-}
 
 })();
