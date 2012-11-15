@@ -62,23 +62,41 @@ everyone.connected(function() {
   currentScreen = screenIds.length - 1;
 });
 
+function ohshit() {
+  everyone.now.reset();
+}
+
 function setUrl(url) {
-  console.log('setting url to ' + url);
   var id = screenIds[currentScreen];
+  var msg;
+  var type = 'url';
+  console.log('setting url to ' + url);
   currentScreen = (currentScreen + 1) % screenIds.length;
 
+  if (/noodletalk\.org/.exec(url)) {
+    type = 'image';
+    url = '/img/nope.gif';
+    msg = "NOPE";
+  } else if (/\.(png|jpe?g|gif)/.exec(url)) {
+    type = 'image';
+  }
+
   now.getClient(id, function() {
-    if (/\.(png|jpe?g|gif)/.exec(url)) {
+    if (type === 'image') {
       this.now.setImage(url);
     } else {
       this.now.setUrl(url);
     }
   });
+
+  return msg;
 }
 
 
 // IRC Bot
 var IRC_TARGET_RE = RegExp('^' + config.irc.nick + ': (.*)$');
+var RESET_RE = RegExp('ohshit|reset|clear');
+
 var ircClient = new irc.Client(config.irc.server, config.irc.nick, {
   channels: config.irc.channels
 });
@@ -92,11 +110,21 @@ ircClient.on('registered', function(message) {
 
 // On receive IRC message.
 ircClient.addListener('message', function(from, to, message) {
-  var match = IRC_TARGET_RE.exec(message);
+  var match;
+  match = RESET_RE.exec(message);
+  if (match) {
+    ohshit();
+    return;
+  }
+
+  match = IRC_TARGET_RE.exec(message);
   if (match) {
     var url = match[1];
-    setUrl(url);
-  } else {
-    console.log('no match');
+    var msg = setUrl(url);
+    console.log(msg);
+    if (msg !== undefined) {
+      ircClient.say(to, msg);
+    }
+    return;
   }
 });

@@ -16,6 +16,11 @@ now.ready(function() {
       })
     );
   };
+
+  now.reset = function() {
+    console.log('reset');
+    $('#container').html('');
+  };
 });
 
 function resize() {
@@ -28,6 +33,13 @@ function resize() {
 $(function() {
   $(window).on('resize', resize);
   resize();
+
+  $(document).keyup(function(e) {
+    if (e.keyCode == 27) { // Esc
+      now.reset();
+    }
+
+  });
 });
 
 
