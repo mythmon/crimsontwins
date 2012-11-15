@@ -1,0 +1,10 @@
+{
+    "irc": {
+        "server": "irc.server.org",
+        "nick": "crimsontwins",
+        "channels": ["#channel1", "#channel2"]
+    },
+    "web": {
+        "port": 8080
+    }
+}
