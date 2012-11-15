@@ -1,0 +1,26 @@
+{
+    "name": "crimsontwins",
+    "description": "IRC bot and web server to power the Mozilla Webdev Crimson Twins",
+    "version": "0.0.0",
+    "author": {
+        "name": "Mike Cooper",
+        "email": "mythmon@mozilla.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/mythmon/crimsontwins.git"
+    },
+    "dependencies": {
+        "irc": ">=0.3.4",
+        "underscore": ">=1.3.3",
+        "now": ">=0.8.1",
+        "node-static": ">=0.3.5"
+    },
+    "engines": {
+        "node": "0.6.18",
+        "npm": "1.1.32"
+    },
+    "bin": {
+        "crimsontwins": "./crimsontwins.js"
+    }
+}
