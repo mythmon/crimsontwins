@@ -38,7 +38,6 @@ $(function() {
     if (e.keyCode == 27) { // Esc
       now.reset();
     }
-
   });
 });
 
