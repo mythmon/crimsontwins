@@ -4,7 +4,7 @@ now.ready(function() {
   now.setUrl = function(url) {
     console.log('Loading url in iframe');
     $('#container').html(
-      $('<iframe>', {src: url})
+      $('<iframe>', {sandbox: true, src: url})
     );
   };
 
