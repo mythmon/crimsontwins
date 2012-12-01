@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var http = require('http');
+var https = require('https');
 var now = require('now');
 var nodestatic = require('node-static');
 var uri = require('uri-js');
@@ -40,7 +41,7 @@ everyone.connected(function() {
   currentScreen = screenIds.length - 1;
 });
 
-// Pick a screen to show a URL on, and kick of the process.
+// Pick a screen to show a URL on, and kick off the process.
 exports.setUrl = function setUrl(url, callback) {
   var id = screenIds[currentScreen];
   if (id === undefined) {
@@ -68,10 +69,6 @@ exports.setUrl = function setUrl(url, callback) {
 
 function _processUrl(url, callback) {
   var components = uri.parse(url);
-  if (components.host === undefined && components.protocol === undefined) {
-    components = uri.parse('http://' + url);
-  }
-
   if (components.errors.length) {
     utils.async(callback, {
       message: "I couldn't parse a url from that."
@@ -103,7 +100,12 @@ function _processUrl(url, callback) {
     path: path
   };
 
-  var req = http.request(options, function(res) {
+  var proto = http;
+  if (components.scheme === 'https') {
+    proto = https;
+  }
+
+  var req = proto.request(options, function(res) {
     var headers = {};
     _.each(res.headers, function(value, key) {
       headers[key.toLowerCase()] = value;
