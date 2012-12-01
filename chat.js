@@ -29,8 +29,13 @@ ircClient.addListener('message', function(from, to, message) {
   }
 
   match = IRC_TARGET_RE.exec(message);
+  var url;
   if (match) {
-    var url = match[1];
+    url = match[1];
+  } else if (from == 'dashbot') {
+    url = message;
+  }
+  if(url) {
     var msg = web.setUrl(url, function(msg) {
       if (msg !== undefined) {
         ircClient.say(to, msg);
