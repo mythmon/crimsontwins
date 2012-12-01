@@ -24,7 +24,7 @@ ircClient.addListener('message', function(from, to, message) {
   var match;
   match = RESET_RE.exec(message);
   if (match) {
-    everyone.now.reset();
+    web.reset();
     return;
   }
 

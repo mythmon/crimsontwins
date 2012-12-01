@@ -152,3 +152,7 @@ function _processUrl(url, callback) {
 
   req.end();
 }
+
+exports.reset = function() {
+    everyone.now.reset();
+};
