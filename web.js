@@ -132,7 +132,8 @@ function _processUrl(url, callback) {
       return;
     }
 
-    if (headers['x-frame-options'] === 'SAMEORIGIN') {
+    var xframe = headers['x-frame-options'].toLowerCase();
+    if (xframe === 'sameorigin' || xframe === 'deny') {
       utils.async(callback, {
         message: "That site prevents framing. It won't work."
       });
