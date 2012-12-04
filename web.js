@@ -89,18 +89,20 @@ function _processUrl(url, callback) {
   if (components.query) {
     path += '?' + components.query;
   }
-
-  var options = {
-    method: 'HEAD',
-    host: components.host,
-    port: components.port || 80,
-    path: path
-  };
+  var port = components.port;
 
   var proto = http;
   if (components.scheme === 'https') {
     proto = https;
+    port = 443;
   }
+
+  var options = {
+    method: 'HEAD',
+    host: components.host,
+    port: port,
+    path: path
+  };
 
   var req = proto.request(options, function(res) {
     var headers = {};
@@ -109,7 +111,7 @@ function _processUrl(url, callback) {
     });
     console.log(JSON.stringify(headers));
 
-    if (res.statusCode === 301) {
+    if (res.statusCode >= 300 && res.statusCode < 400) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
       return _processUrl(headers.location, callback);
