@@ -89,9 +89,6 @@ function _processUrl(url, callback) {
   if (components.query) {
     path += '?' + components.query;
   }
-  if (components.fragment) {
-    path += '#' + components.fragment;
-  }
 
   var options = {
     method: 'HEAD',
