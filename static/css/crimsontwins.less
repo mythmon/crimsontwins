@@ -4,20 +4,25 @@ body {
 
 #container {
   background: url(/img/debut_dark.png);
+  position: relative;
+
+  .imgbg, iframe {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 
   .imgbg {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
-    width: 100%;
-    height: 100%;
   }
 
   iframe {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border: 0;
     background: #fff;
   }
 }
