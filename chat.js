@@ -36,9 +36,9 @@ ircClient.addListener('message', function(from, to, message) {
     url = message;
   }
   if(url) {
-    var msg = web.setUrl(url, function(msg) {
-      if (msg !== undefined) {
-        ircClient.say(to, msg);
+    var msg = web.setUrl(url, -1, function(opts) {
+      if (opts['message']) {
+        ircClient.say(to, opts['message']);
       }
     });
   }

@@ -23,6 +23,7 @@ httpServer = http.createServer(function(request, response) {
 var everyone = now.initialize(httpServer);
 screenIds = [];
 var currentScreen = 0;
+var resetTimers = {};
 
 everyone.disconnected(function() {
   console.log('screen disconnected ' + JSON.stringify(this));
@@ -32,6 +33,7 @@ everyone.disconnected(function() {
   }
   // Make sure that `currentScreen` is still valid.
   currentScreen = (currentScreen + 1) % screenIds.length;
+  clearInterval(resetTimers[this.user.clientId]);
 });
 
 everyone.connected(function() {
@@ -39,32 +41,47 @@ everyone.connected(function() {
   screenIds.push(this.user.clientId);
   // Make the next url go to this screen.
   currentScreen = screenIds.length - 1;
+  exports.showDefault(this.user.clientId);
 });
 
 // Pick a screen to show a URL on, and kick off the process.
-exports.setUrl = function setUrl(url, callback) {
-  var id = screenIds[currentScreen];
-  if (id === undefined) {
-    utils.async(callback, "No screens connected.");
-    return;
+exports.setUrl = function(url, screenId, callback) {
+  if (screenId === -1) {
+    screenId = screenIds[currentScreen];
+    if (screenId === undefined) {
+      utils.async(callback, "No screens connected.");
+      return;
+    }
+    currentScreen = (currentScreen + 1) % screenIds.length;
   }
-  currentScreen = (currentScreen + 1) % screenIds.length;
 
-  now.getClient(id, function() {
+  console.log(screenId);
+  now.getClient(screenId, function() {
     var screen = this;
+    if (!this) {
+      return;
+    }
     _processUrl(url, function(opts) {
-      if (opts.message) {
-        utils.async(callback, opts.message);
-      }
       if (opts.url) {
+        if (!screen) {
+          return;
+        }
         if (opts.type === 'image') {
           screen.now.setImage(opts.url);
         } else {
           screen.now.setUrl(opts.url);
         }
       }
+      utils.async(callback, _.extend({}, {screenId: screenId}, opts));
     });
   });
+
+  if (resetTimers[screenId]) {
+    clearInterval(resetTimers[screenId]);
+  }
+  resetTimers[screenId] = setTimeout(function() {
+    exports.showDefault(screenId);
+  }, config.resetTime);
 };
 
 function _processUrl(url, callback) {
@@ -109,6 +126,7 @@ function _processUrl(url, callback) {
     _.each(res.headers, function(value, key) {
       headers[key.toLowerCase()] = value;
     });
+    console.log(url);
     console.log(JSON.stringify(headers));
 
     if (res.statusCode >= 300 && res.statusCode < 400) {
@@ -117,14 +135,15 @@ function _processUrl(url, callback) {
       return _processUrl(headers.location, callback);
     }
 
-    if (res.statusCode === 404) {
+    if (res.statusCode >= 400) {
       utils.async(callback, {
         message: 'There was a problem with the url (' + res.statusCode + ')'
       });
       return;
     }
 
-    if (headers['content-type'].indexOf('image/') === 0) {
+    var contentType = (headers['content-type'] || '').toLowerCase();
+    if (contentType.indexOf('image/') === 0) {
       utils.async(callback, {
         url: url,
         type: 'image'
@@ -155,4 +174,12 @@ function _processUrl(url, callback) {
 
 exports.reset = function() {
     everyone.now.reset();
+};
+
+exports.showDefault = function(screenId) {
+  var defaultUrl = config.resetUrls[0];
+  config.resetUrls = utils.shuffle(config.resetUrls);
+
+  config.resetUrls.push(defaultUrl);
+  exports.setUrl(defaultUrl, screenId, function() {});
 };
