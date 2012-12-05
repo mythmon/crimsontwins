@@ -76,9 +76,7 @@ exports.setUrl = function(url, screenId, callback) {
     });
   });
 
-  if (resetTimers[screenId]) {
-    clearInterval(resetTimers[screenId]);
-  }
+  clearTimeout(resetTimers[screenId]);
   resetTimers[screenId] = setTimeout(function() {
     exports.showDefault(screenId);
   }, config.resetTime);
