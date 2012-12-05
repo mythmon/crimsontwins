@@ -25,6 +25,10 @@ screenIds = [];
 var currentScreen = 0;
 var resetTimers = {};
 
+everyone.now.clientReady = function() {
+  exports.showDefault(this.user.clientId);
+}
+
 everyone.disconnected(function() {
   console.log('screen disconnected ' + JSON.stringify(this));
   var index = screenIds.indexOf(this.user.clientId);
@@ -41,7 +45,6 @@ everyone.connected(function() {
   screenIds.push(this.user.clientId);
   // Make the next url go to this screen.
   currentScreen = screenIds.length - 1;
-  exports.showDefault(this.user.clientId);
 });
 
 // Pick a screen to show a URL on, and kick off the process.
@@ -58,28 +61,28 @@ exports.setUrl = function(url, screenId, callback) {
   console.log(screenId);
   now.getClient(screenId, function() {
     var screen = this;
-    if (!this) {
+    if (!screen || !screen.now) {
+      console.log("Can't talk to screen: " + screen);
+      clearTimeout(resetTimers[screenId]);
       return;
     }
     _processUrl(url, function(opts) {
       if (opts.url) {
-        if (!screen) {
-          return;
-        }
         if (opts.type === 'image') {
           screen.now.setImage(opts.url);
         } else {
           screen.now.setUrl(opts.url);
         }
       }
+
+      clearTimeout(resetTimers[screenId]);
+      resetTimers[screenId] = setTimeout(function() {
+        exports.showDefault(screenId);
+      }, config.resetTime);
+
       utils.async(callback, _.extend({}, {screenId: screenId}, opts));
     });
   });
-
-  clearTimeout(resetTimers[screenId]);
-  resetTimers[screenId] = setTimeout(function() {
-    exports.showDefault(screenId);
-  }, config.resetTime);
 };
 
 function _processUrl(url, callback) {

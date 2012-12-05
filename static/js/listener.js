@@ -12,11 +12,12 @@ function updateContents($element) {
   $element.css({'opacity': 0});
   $container.append($element);
 
-  $element.animate({opacity: 1}, {duration: 3000, queue: false});
-  $current.animate({opacity: 0}, {duration: 3000, queue: false, complete: function() {
-    console.log('done animating');
-    $current.remove();
-  }});
+  $element.animate({opacity: 1}, {duration: 2000, queue: false});
+  $current.animate({opacity: 0}, {
+    duration: 3000,
+    queue: false,
+    complete: $current.remove
+  });
 }
 
 now.ready(function() {
@@ -43,6 +44,8 @@ now.ready(function() {
     console.log('reset');
     $('#container').html('');
   };
+
+  now.clientReady();
 });
 
 function resize() {

@@ -10,7 +10,9 @@ var defaults = {
     },
     web: {
         port: 8080
-    }
+    },
+    "resetTime": 60000,
+    "resetUrls": []
 };
 
 var existsSync = fs.existsSync || path.existsSync;
