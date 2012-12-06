@@ -1,29 +1,9 @@
 ;(function() {
 
-function updateContents($element) {
-  var $container = $('#container');
-  var $current = $container.children();
-  if (!$current.length) {
-    $container.html($element);
-    return;
-  }
-
-  $current.css({'opacity': 1});
-  $element.css({'opacity': 0});
-  $container.append($element);
-
-  $element.animate({opacity: 1}, {duration: 2000, queue: false});
-  $current.animate({opacity: 0}, {
-    duration: 3000,
-    queue: false,
-    complete: $current.remove
-  });
-}
-
 now.ready(function() {
   now.setUrl = function(url) {
     console.log('Loading url in iframe');
-    updateContents(
+    $('#container').html(
       $('<iframe>', {
         sandbox: 'allow-same-origin allow-scripts allow-forms',
         src: url
@@ -33,7 +13,7 @@ now.ready(function() {
 
   now.setImage = function(url) {
     console.log('Loading image');
-    updateContents(
+    $('#container').html(
       $('<div class="imgbg"/>').css({
         'background-image': 'url(' + url + ')'
       })
