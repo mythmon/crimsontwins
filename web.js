@@ -93,6 +93,11 @@ function _processUrl(url, callback) {
     });
     return;
   }
+  if (components.host === undefined) {
+    utils.async(callback, {
+      message: "Couldn't load URL. (Maybe a bad redirect?)"
+    });
+  }
 
   if (components.host.indexOf('noodletalk.org') >= 0) {
     utils.async(callback, {
