@@ -1,9 +1,33 @@
 ;(function() {
 
+var containerIndex = 0;
+var $containers = $('.container');
+
+function updateContents($element) {
+  $prev = $containers.slice(containerIndex, containerIndex+1);
+  containerIndex = (containerIndex + 1) % $containers.length;
+  $next = $containers.slice(containerIndex, containerIndex+1);
+
+  console.log($prev);
+  console.log($next);
+
+  //$next.css('z-index', 2);
+  //$prev.css('z-index', 1);
+
+  $next.html($element);
+
+  $next.css('opacity', 1.0);
+  $prev.css('opacity', 0.0);
+
+  $prev.once('transitioned', function() {
+    $prev.html('');
+  });
+}
+
 now.ready(function() {
   now.setUrl = function(url) {
     console.log('Loading url in iframe');
-    $('#container').html(
+    updateContents(
       $('<iframe>', {
         sandbox: 'allow-same-origin allow-scripts allow-forms',
         src: url
@@ -13,7 +37,7 @@ now.ready(function() {
 
   now.setImage = function(url) {
     console.log('Loading image');
-    $('#container').html(
+    updateContents(
       $('<div class="imgbg"/>').css({
         'background-image': 'url(' + url + ')'
       })
@@ -29,7 +53,7 @@ now.ready(function() {
 });
 
 function resize() {
-  $('#container').css({
+  $('.container, #wrap').css({
     width: window.innerWidth,
     height: window.innerHeight
   });
