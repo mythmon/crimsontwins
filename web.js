@@ -86,6 +86,10 @@ exports.setUrl = function(url, screenId, callback) {
 };
 
 function _processUrl(url, callback) {
+  if (url.indexOf('://') == -1) {
+    url = 'http://' + url;
+  }
+  
   var components = uri.parse(url);
   if (components.errors.length) {
     utils.async(callback, {
