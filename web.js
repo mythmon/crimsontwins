@@ -7,6 +7,7 @@ var uri = require('uri-js');
 
 var config = require('./config');
 var utils = require('./utils');
+var modifiers = require('./modifiers');
 
 
 // Web server
@@ -58,7 +59,6 @@ exports.setUrl = function(url, screenId, callback) {
     currentScreen = (currentScreen + 1) % screenIds.length;
   }
 
-  console.log(screenId);
   now.getClient(screenId, function() {
     var screen = this;
     if (!screen || !screen.now) {
@@ -99,13 +99,12 @@ function _processUrl(url, callback) {
     });
   }
 
-  if (components.host.indexOf('noodletalk.org') >= 0) {
-    utils.async(callback, {
-      message:'NOPE',
-      type: 'image',
-      url: '/img/nope.gif'
-    });
-    return;
+  for (var i=0; i < modifiers.all.length; i++) {
+    var out = modifiers.all[i]({url: url, components: components});
+    if (out) {
+      utils.async(callback, out);
+      return;
+    }
   }
 
   var path = components.path;
