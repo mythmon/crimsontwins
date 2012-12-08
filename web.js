@@ -179,7 +179,9 @@ function _processUrl(url, callback) {
 }
 
 exports.reset = function() {
-    everyone.now.reset();
+    _.each(screenIds, function(id) {
+      exports.showDefault(id);
+    });
 };
 
 exports.showDefault = function(screenId) {
