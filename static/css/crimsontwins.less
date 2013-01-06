@@ -5,32 +5,110 @@ body {
 #wrap {
   position: relative;
   background: url(/img/debut_dark.png);
+}
 
-  .container {
-    position: absolute;
-    top: 0;
-    left: 0;
+.container, .preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  transition: opacity 2s;
+  -moz-transition: opacity 2s;
+  -webkit-transition: opacity 2s;
+
+  .imgbg {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
     width: 100%;
     height: 100%;
+  }
 
-    transition: opacity 2s;
-    -moz-transition: opacity 2s;
-    -webkit-transition: opacity 2s;
+  iframe {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 0;
+    background: #fff;
+  }
+}
 
-    .imgbg {
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center center;
-      width: 100%;
-      height: 100%;
+.selector {
+  list-style: none;
+
+  li {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+
+    h1 {
+      font-size: 1em;
+      margin: 0;
+      background: #444;
+      color: #fff;
+      text-align: center;
     }
 
-    iframe {
+    .preview {
+      position: relative;
+      width: 240px;
+      height: 180px;
+      border: 1px solid #555;
+      background: url(/img/debut_dark.png);
+
+      > i.add {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        line-height: 58px;
+        border-size: 10px;
+        border-radius: 64px;
+        display: block;
+
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -32px;
+      }
+
+      iframe {
+        transform-origin: 0 0;
+        transform: scale(0.2);
+        width: 500%;
+        height: 500%;
+        position: absolute;
+      }
+    }
+
+    .click-target {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
-      border: 0;
-      background: #fff;
+      z-index: 10;
+      cursor: pointer;
+    }
+  }
+}
+
+i {
+  display: inline-block;
+
+  &.add {
+    color: #ABA;
+    border: 5px solid #ABA;
+    border-radius: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    line-height: 32px;
+    text-align: center;
+
+    &:before {
+      content: "+";
     }
   }
 }

@@ -8,6 +8,7 @@ var uri = require('uri-js');
 var config = require('./config');
 var utils = require('./utils');
 var modifiers = require('./modifiers');
+var manager = new (require('./manager').Manager)();
 
 
 // Web server
@@ -27,8 +28,19 @@ var currentScreen = 0;
 var resetTimers = {};
 
 everyone.now.clientReady = function() {
+  screenIds.push(this.user.clientId);
+  // Make the next url go to this screen.
+  currentScreen = screenIds.length - 1;
   exports.showDefault(this.user.clientId);
-}
+};
+
+everyone.now.clientReadyManaged = function() {
+  manager.addClient(this);
+};
+
+everyone.now.getScreens = function(callback) {
+  return manager.getScreens(callback);
+};
 
 everyone.disconnected(function() {
   console.log('screen disconnected ' + JSON.stringify(this));
@@ -43,9 +55,6 @@ everyone.disconnected(function() {
 
 everyone.connected(function() {
   console.log('screen connected');
-  screenIds.push(this.user.clientId);
-  // Make the next url go to this screen.
-  currentScreen = screenIds.length - 1;
 });
 
 // Pick a screen to show a URL on, and kick off the process.
@@ -89,7 +98,7 @@ function _processUrl(url, callback) {
   if (url.indexOf('://') == -1) {
     url = 'http://' + url;
   }
-  
+
   var components = uri.parse(url);
   if (components.errors.length) {
     utils.async(callback, {
