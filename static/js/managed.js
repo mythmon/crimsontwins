@@ -61,7 +61,7 @@ now.ready(function() {
 });
 
 function resize() {
-  $('.container, #wrap').css({
+  $('.wrap').css({
     width: window.innerWidth,
     height: window.innerHeight
   });
@@ -95,7 +95,11 @@ function init() {
 }
 
 function makeSelector() {
-  var $selectorUl = $('<ul>', {'class': 'selector'});
+  var $selector = $('<div>', {'class': 'selector'});
+  var $selectorUl = $('<ul>');
+
+  $selector.append('<h1>Select a screen to view</h1>');
+  $selector.append($selectorUl);
 
   var screens = now.getScreens(function(screens) {
     _.each(screens, function(screen) {
@@ -122,8 +126,7 @@ function makeSelector() {
         ev.preventDefault();
       })
     );
-
-    $('body').append('<h1>Select a screen to view</h1>').append($selectorUl);
+    $('body').append($selector);
   });
 }
 
@@ -136,17 +139,46 @@ var screenPreviewTemplate =
 function makeScreenPreview(screen) {
   var $elem = $(screenPreviewTemplate.format(screen))
     .data('screen', screen)
-    .attr('id', 'screen-' + screen.id)
-    .on('click', function(ev) {
-      ev.preventDefault();
-      console.log('clicked on a screen');
-      var screen = $(this).data('screen');
-      now.changeScreen(screen.name);
-    });
+    .attr('name', 'screen-' + screen.id)
+    .find('h1')
+      .on('click', function(ev) {
+        ev.preventDefault();
+        console.log('clicked on a heading');
+        var screen = $(this).parent().data('screen');
+        now.changeScreen(screen.name);
+      })
+    .end()
+    .find('.content')
+      .on('click', function(ev) {
+        ev.preventDefault();
+        var $this = $(this);
+        console.log('clicked on a screen');
+        var screen = $this.data('screen');
+        selectScreen($this.parent());
+      })
+    .end();
   $elem.children('.content').html(elementFor(screen.content));
   return $elem;
 }
 
+function selectScreen($elem) {
+  var screen = $elem.data('screen');
+  $wrap = $('<div>', {
+      'class': 'wrap',
+      'name': 'screen-' + screen.id
+    })
+    .append($('<div class="content"/>')
+      .html(elementFor(screen.content)))
+    .css({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+
+  $('.selector').hide();
+  $('body').append($wrap);
+}
+
+/******** Now.js connections ********/
 now.screenAdded = function(screen) {
   console.log("Adding screen: " + JSON.stringify(screen));
   $('.selector .meta').first().before(makeScreenPreview(screen));
@@ -154,7 +186,7 @@ now.screenAdded = function(screen) {
 
 now.screenChanged = function(screen) {
   console.log("Changing screen: " + JSON.stringify(screen));
-  $('#screen-{id} .content'.format(screen))
+  $('[name=screen-{id}] .content'.format(screen))
     .html(elementFor(screen.content))
     .data('screen', screen);
 };
