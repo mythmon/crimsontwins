@@ -1,47 +1,76 @@
 var _ = require('underscore');
 
+var config = require('./config.js');
 var utils = require('./utils');
+var clientConnection = require('./clientConnection');
 
-/* Class Manager
- *
- * Manages clients, screens, and content.
+var everyone = clientConnection.everyone;
+
+/* Manages clients, screens, and content.
  *
  * - Client: A connected web browser. Shows one or more Screens.
  * - Screen: A place for content to live. Viewed by one or more clients.
  * - Content: A thing shown on a screen.
  */
-function Manager(options) {
-    _.extend(this, {
-    }, options, {
-        clients: [],
-        screens: []
-    });
-}
 
-Manager.prototype.addClient = function(client) {
-    this.clients.push(client);
+var clients = [];
+var screens = [];
+
+var addClient = function(client) {
+  clients.push(client);
 };
 
 /* This is a now.js function. */
-Manager.prototype.getScreens = function(callback) {
-    var screens = [
-        {
-            title: "Tomax",
-            content: {type: 'image', url: '/img/nope.gif'}
-        },
-        {
-            title: "Xomat",
-            content: {type: 'url', url: 'http://scrumbu.gs/t/james-rifles/2012.23/'}
-        },
-        {
-            title: "PDX",
-            content: {type: 'image', url: 'https://gs1.wac.edgecastcdn.net/8019B6/data.tumblr.com/tumblr_lxqes0ox2J1r5691eo1_400.gif'}
-        }
-    ];
-    if (callback === undefined) {
-        return screens;
-    }
-    utils.async(callback, screens);
+var getScreens = function() {
+  return screens;
 };
 
-exports.Manager = Manager;
+
+var nextContent = 0;
+var contentSet = [
+  {type: 'url', url: 'http://wikipedia.org'},
+  {type: 'image', url: '/img/nope.gif'},
+  {type: 'image', url: 'http://i.imgur.com/46xWL.gif'},
+  {type: 'image', url: 'https://s3.amazonaws.com/data.tumblr.com/tumblr_lxf2q5Rdcz1r1ibsxo1_500.gif'},
+  {type: 'image', url: 'https://images.4chan.org/wsg/src/1357060530091.gif'},
+];
+
+var addScreen = function(name) {
+  var screen = {
+    id: utils.getId(),
+    name: name,
+    content: contentSet[nextContent]
+  };
+  nextContent = (nextContent + 1) % contentSet.length;
+  screens.push(screen);
+  everyone.now.screenAdded(screen);
+};
+
+/********** Now.js connections **********/
+// Now.js sometimes has some different calling conventions, so translate.
+everyone.now.addClient = function() {
+  addClient(this);
+};
+
+everyone.now.getScreens = function(callback) {
+  var screens = getScreens();
+  utils.async(callback, screens);
+};
+
+everyone.now.addScreen = function(name) {
+  addScreen(name);
+};
+
+everyone.now.changeScreen = function(name) {
+  var screen;
+  _.each(screens, function(s) {
+    if (s.name === name) {
+      screen = s;
+    }
+  });
+  if (screen !== undefined) {
+    screen.content = contentSet[nextContent];
+    nextContent = (nextContent + 1) % contentSet.length;
+    everyone.now.screenChanged(screen);
+  }
+};

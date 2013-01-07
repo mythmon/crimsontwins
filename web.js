@@ -1,26 +1,26 @@
-var _ = require('underscore');
+//var _ = require('underscore');
 var http = require('http');
-var https = require('https');
-var now = require('now');
+//var https = require('https');
+//var now = require('now');
 var nodestatic = require('node-static');
-var uri = require('uri-js');
+//var uri = require('uri-js');
 
 var config = require('./config');
-var utils = require('./utils');
-var modifiers = require('./modifiers');
-var manager = new (require('./manager').Manager)();
+//var utils = require('./utils');
+//var modifiers = require('./modifiers');
 
 
 // Web server
-files = new (nodestatic.Server)('./static');
+var files = new (nodestatic.Server)('./static');
 
-httpServer = http.createServer(function(request, response) {
+exports.httpServer = http.createServer(function(request, response) {
   request.addListener('end', function() {
     files.serve(request, response);
   });
 }).listen(config.web.port);
 
 
+/*
 // Now.js connection
 var everyone = now.initialize(httpServer);
 screenIds = [];
@@ -32,14 +32,6 @@ everyone.now.clientReady = function() {
   // Make the next url go to this screen.
   currentScreen = screenIds.length - 1;
   exports.showDefault(this.user.clientId);
-};
-
-everyone.now.clientReadyManaged = function() {
-  manager.addClient(this);
-};
-
-everyone.now.getScreens = function(callback) {
-  return manager.getScreens(callback);
 };
 
 everyone.disconnected(function() {
@@ -203,3 +195,4 @@ exports.showDefault = function(screenId) {
   config.resetUrls.push(defaultUrl);
   exports.setUrl(defaultUrl, screenId, function() {});
 };
+*/

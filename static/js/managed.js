@@ -32,6 +32,9 @@ function elementFor(content) {
       'background-image': 'url({url})'.format(content)
     });
   }
+  if (content.type == 'html') {
+    return $(content.html);
+  }
 }
 
 now.ready(function() {
@@ -53,7 +56,7 @@ now.ready(function() {
     window.location.reload();
   };
 
-  now.clientReadyManaged();
+  now.addClient();
   ready('now');
 });
 
@@ -79,39 +82,81 @@ $(function() {
 
 readyParts = ['dom', 'now'];
 function ready(part) {
-  readyParts = _.without(readyParts, part);
-  if (!readyParts.length) {
-    init();
+  if (readyParts.indexOf(part) >= 0) {
+    readyParts = _.without(readyParts, part);
+    if (!readyParts.length) {
+      init();
+    }
   }
 }
 
 function init() {
+  makeSelector();
+}
+
+function makeSelector() {
   var $selectorUl = $('<ul>', {'class': 'selector'});
-  var template = '<li>' +
-    '<h1 class="title">{title}</h1>' +
-    '<div class="preview"/>' +
-    '<div class="click-target"/>' +
-    '</li>';
 
   var screens = now.getScreens(function(screens) {
-    var $li;
-
     _.each(screens, function(screen) {
-      var $li = $(template.format(screen));
-      $li.children('.preview').html(elementFor(screen.content));
-      $selectorUl.append($li);
+      $selectorUl.append(makeScreenPreview(screen));
     });
 
-    $li = $(template.format({title: 'New screen'}));
-    $li.find('.preview').html('<i class="add">');
-    $selectorUl.append($li);
+    $selectorUl.append(makeScreenPreview({
+        name: 'New screen',
+        content: {type: 'html', html: '<i class="add">'}
+      })
+      .addClass('meta')
+      .on('click', function(ev) {
+        ev.preventDefault();
+        now.addScreen('herpderp ' + (new Date()).getMilliseconds());
+      })
+    );
 
-    $li = $(template.format({title: 'Hydra Mode'}));
-    $li.find('.preview').html('<i class="hydra">');
-    $selectorUl.append($li);
+    $selectorUl.append(makeScreenPreview({
+        name: 'Hydra mode',
+        content: {type: 'html', html: '<i class="hydra">'}
+      })
+      .addClass('meta')
+      .on('click', function(ev) {
+        ev.preventDefault();
+      })
+    );
 
-    $('body').html($selectorUl);
+    $('body').append('<h1>Select a screen to view</h1>').append($selectorUl);
   });
 }
+
+var screenPreviewTemplate =
+  '<li class="preview">' +
+    '<h1>{name}</h1>' +
+    '<div class="content"/>' +
+  '</li>';
+
+function makeScreenPreview(screen) {
+  var $elem = $(screenPreviewTemplate.format(screen))
+    .data('screen', screen)
+    .attr('id', 'screen-' + screen.id)
+    .on('click', function(ev) {
+      ev.preventDefault();
+      console.log('clicked on a screen');
+      var screen = $(this).data('screen');
+      now.changeScreen(screen.name);
+    });
+  $elem.children('.content').html(elementFor(screen.content));
+  return $elem;
+}
+
+now.screenAdded = function(screen) {
+  console.log("Adding screen: " + JSON.stringify(screen));
+  $('.selector .meta').first().before(makeScreenPreview(screen));
+};
+
+now.screenChanged = function(screen) {
+  console.log("Changing screen: " + JSON.stringify(screen));
+  $('#screen-{id} .content'.format(screen))
+    .html(elementFor(screen.content))
+    .data('screen', screen);
+};
 
 })();

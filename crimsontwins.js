@@ -1,3 +1,3 @@
-require('./config.js');
-require('./web.js');
-require('./chat.js');
+require('./config');
+require('./manager');
+require('./chat');

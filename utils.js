@@ -39,4 +39,9 @@ String.prototype.format = function(obj) {
       return args[index];
     }
   });
-}
+};
+
+var _nextId = 0;
+exports.getId = function() {
+  return _nextId++;
+};
