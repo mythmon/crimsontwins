@@ -1,12 +1,12 @@
 var irc = require('irc');
 
 var config = require('./config');
-var web = require('./web');
+var manager = require('./manager');
 
 
 // IRC Bot
 var IRC_TARGET_RE = RegExp('^' + config.irc.nick + ': (.*)$');
-var RESET_RE = RegExp('ohshit|reset|clear');
+var RESET_RE = RegExp(config.irc.nick + ': ohshit|reset|clear');
 
 var ircClient = new irc.Client(config.irc.server, config.irc.nick, {
   channels: config.irc.channels
@@ -14,9 +14,11 @@ var ircClient = new irc.Client(config.irc.server, config.irc.nick, {
 
 // On connected to IRC server
 ircClient.on('registered', function(message) {
-    // Store the nickname assigned by the server
-    config.irc.nick = message.args[0];
-    IRC_TARGET_RE = RegExp('^' + config.irc.nick + ': (.*)$');
+  // Store the nickname assigned by the server
+  config.irc.nick = message.args[0];
+  // Update regexes that use the nick.
+  IRC_TARGET_RE = RegExp('^' + config.irc.nick + ': (.*)$');
+  RESET_RE = RegExp(config.irc.nick + ': ohshit|reset|clear');
 });
 
 // On receive IRC message.
@@ -24,7 +26,7 @@ ircClient.addListener('message', function(from, to, message) {
   var match;
   match = RESET_RE.exec(message);
   if (match) {
-    web.reset();
+    manager.reset();
     return;
   }
 
@@ -36,7 +38,7 @@ ircClient.addListener('message', function(from, to, message) {
     url = message;
   }
   if(url) {
-    var msg = web.setUrl(url, -1, function(opts) {
+    manager.setUrl(url, null, function(opts) {
       if (opts['message']) {
         ircClient.say(to, opts['message']);
       }

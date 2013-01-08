@@ -56,7 +56,6 @@ now.ready(function() {
     window.location.reload();
   };
 
-  now.addClient();
   ready('now');
 });
 
@@ -109,23 +108,23 @@ function makeSelector() {
     $selectorUl.append(makeScreenPreview({
         name: 'New screen',
         content: {type: 'html', html: '<i class="add">'}
-      })
+      }, false)
       .addClass('meta')
       .on('click', function(ev) {
+        console.log('new clicked');
         ev.preventDefault();
         now.addScreen('herpderp ' + (new Date()).getMilliseconds());
-      })
-    );
+      }));
 
     $selectorUl.append(makeScreenPreview({
         name: 'Hydra mode',
         content: {type: 'html', html: '<i class="hydra">'}
-      })
+      }, false)
       .addClass('meta')
       .on('click', function(ev) {
         ev.preventDefault();
-      })
-    );
+        console.log('hyrda clicked');
+      }));
     $('body').append($selector);
   });
 }
@@ -136,27 +135,21 @@ var screenPreviewTemplate =
     '<div class="content"/>' +
   '</li>';
 
-function makeScreenPreview(screen) {
+function makeScreenPreview(screen, events) {
+  console.log(arguments);
+  if (events === undefined) {
+    events = true;
+  }
   var $elem = $(screenPreviewTemplate.format(screen))
     .data('screen', screen)
-    .attr('name', 'screen-' + screen.id)
-    .find('h1')
-      .on('click', function(ev) {
-        ev.preventDefault();
-        console.log('clicked on a heading');
-        var screen = $(this).parent().data('screen');
-        now.changeScreen(screen.name);
-      })
-    .end()
-    .find('.content')
-      .on('click', function(ev) {
-        ev.preventDefault();
-        var $this = $(this);
-        console.log('clicked on a screen');
-        var screen = $this.data('screen');
-        selectScreen($this.parent());
-      })
-    .end();
+    .attr('name', 'screen-' + screen.id);
+  if (events) {
+    $elem.find('.content').on('click', function(ev) {
+      ev.preventDefault();
+      console.log('clicked on a screen');
+      selectScreen($(this).parent());
+    });
+  }
   $elem.children('.content').html(elementFor(screen.content));
   return $elem;
 }
@@ -186,9 +179,9 @@ now.screenAdded = function(screen) {
 
 now.screenChanged = function(screen) {
   console.log("Changing screen: " + JSON.stringify(screen));
-  $('[name=screen-{id}] .content'.format(screen))
-    .html(elementFor(screen.content))
-    .data('screen', screen);
+  $preview = $('[name=screen-{id}]'.format(screen));
+  $preview.find('.content').html(elementFor(screen.content));
+  $preview.data('screen', screen);
 };
 
 })();
