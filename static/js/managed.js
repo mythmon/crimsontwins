@@ -37,28 +37,6 @@ function elementFor(content) {
   }
 }
 
-now.ready(function() {
-  now.setUrl = function(url) {
-    console.log('Loading url in iframe');
-    updateContents(elementFor({type: 'html', url: url}));
-  };
-
-  now.setImage = function(url) {
-    console.log('Loading image');
-    updateContents(elementFor({type: 'image', url: url}));
-  };
-
-  now.screenChange = function(message) {
-  };
-
-  now.reset = function() {
-    console.log('reset');
-    window.location.reload();
-  };
-
-  ready('now');
-});
-
 function resize() {
   $('.wrap').css({
     width: window.innerWidth,
@@ -149,6 +127,13 @@ function makeScreenPreview(screen, events) {
       console.log('clicked on a screen');
       selectScreen($(this).parent());
     });
+    $elem.find('h1').append(
+      $('<button class="close">X</button>')
+        //.on('click', now.removeScreen.bind(this, screen.id)));
+        .on('click', function() {
+          console.log('removing screen');
+          now.removeScreen(screen.id);
+        }));
   }
   $elem.children('.content').html(elementFor(screen.content));
   return $elem;
@@ -172,16 +157,39 @@ function selectScreen($elem) {
 }
 
 /******** Now.js connections ********/
-now.screenAdded = function(screen) {
-  console.log("Adding screen: " + JSON.stringify(screen));
-  $('.selector .meta').first().before(makeScreenPreview(screen));
-};
+now.ready(function() {
+  now.setUrl = function(url) {
+    console.log('Loading url in iframe');
+    updateContents(elementFor({type: 'html', url: url}));
+  };
 
-now.screenChanged = function(screen) {
-  console.log("Changing screen: " + JSON.stringify(screen));
-  $preview = $('[name=screen-{id}]'.format(screen));
-  $preview.find('.content').html(elementFor(screen.content));
-  $preview.data('screen', screen);
-};
+  now.setImage = function(url) {
+    console.log('Loading image');
+    updateContents(elementFor({type: 'image', url: url}));
+  };
+
+  now.reset = function() {
+    console.log('reset');
+    window.location.reload();
+  };
+
+  now.screenAdded = function(screen) {
+    console.log("Adding screen: " + JSON.stringify(screen));
+    $('.selector .meta').first().before(makeScreenPreview(screen));
+  };
+
+  now.screenChanged = function(screen) {
+    console.log("Changing screen: " + JSON.stringify(screen));
+    $preview = $('[name=screen-{id}]'.format(screen));
+    $preview.find('.content').html(elementFor(screen.content));
+    $preview.data('screen', screen);
+  };
+
+  now.screenRemoved = function(screen) {
+    $('[name=screen-{id}]'.format(screen)).remove();
+  };
+
+  ready('now');
+});
 
 })();

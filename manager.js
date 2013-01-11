@@ -32,27 +32,59 @@ _.each(config.resetUrls, function(url) {
 });
 
 exports.addScreen = function(name) {
+  var id = utils.getId();
   var screen = {
-    id: utils.getId(),
+    id: id,
     name: name,
-    content: getDefaultContent()
+    content: null,
+    resetId: null
   };
   screens.push(screen);
-  everyone.now.screenAdded(screen);
+  cycleScreen(screen.id);
+  sendScreenAdded(screen);
+};
+
+removeScreen = function(id) {
+  var screen = findScreen('id', id);
+  if (screen !== undefined) {
+    clearTimeout(screen.timeout);
+    screens = _.without(screens, screen);
+    sendScreenRemoved(screen);
+  }
+};
+
+findScreen = function(key, value, moveNextScreen) {
+  var found, index;
+  _.each(screens, function(s, i) {
+    if (s[key] === value) {
+      found = s;
+      index = i;
+    }
+  });
+  if (moveNextScreen && index === nextScreen) {
+    nextScreen = (nextScreen + 1) % screen.length;
+  }
+  return found;
+};
+
+cycleScreen = function(screen_id) {
+  var screen = findScreen('id', screen_id);
+  if (screen === undefined) {
+    return;
+  }
+  screen.content = getDefaultContent();
+
+  sendScreenChanged(screen);
+
+  screen.timeout = setTimeout(cycleScreen.bind(this, screen_id),
+    config.resetTime);
 };
 
 /* Put new content on the next screen in the line up. */
 exports.setUrl = function(url, screen_name, callback) {
   var screen;
   if (screen_name) {
-    _.each(screens, function(s, index) {
-      if (s.name == screen_name) {
-        screen = s;
-        if (index == nextScreen) {
-          nextScreen = (nextScreen + 1) % screen.length;
-        }
-      }
-    });
+    screen = findScreen('name', screen_name, true);
   }
   // The above loop might fail, so check for that.
   if (screen === undefined) {
@@ -62,7 +94,10 @@ exports.setUrl = function(url, screen_name, callback) {
 
   contentForUrl(url, function(content) {
     screen.content = content;
-    everyone.now.screenChanged(screen);
+    sendScreenChanged(screen);
+    clearTimeout(screen.timeout);
+    screen.timeout = setTimeout(cycleScreen.bind(this, screen.id),
+      config.resetTime);
     utils.async(callback, content);
   });
 };
@@ -70,7 +105,7 @@ exports.setUrl = function(url, screen_name, callback) {
 exports.reset = function() {
   _.each(screens, function(screen) {
     screen.content = getDefaultContent();
-    everyone.now.screenChanged(screen);
+    sendScreenChanged(screen);
   });
 };
 
@@ -84,7 +119,7 @@ function getDefaultContent() {
 }
 
 function contentForUrl(url, callback) {
-  if (url.indexOf('://') == -1) {
+  if (url.indexOf('://') === -1) {
     url = 'http://' + url;
   }
 
@@ -189,10 +224,28 @@ everyone.now.getScreens = function(callback) {
   utils.async(callback, screens);
 };
 
-everyone.now.addScreen = function(name) {
-  exports.addScreen(name);
-};
+everyone.now.addScreen = exports.addScreen;
 
-everyone.now.changeScreen = function(name) {
-  console.log('change screen');
-};
+everyone.now.removeScreen = removeScreen;
+
+// Screen objects store some things that can't go over the wire. So don't
+// include those.
+function _getWireSafeScreen(screen) {
+  return {
+    'id': screen.id,
+    'name': screen.name,
+    'content': screen.content
+  };
+}
+
+function sendScreenAdded(screen) {
+  everyone.now.screenAdded(_getWireSafeScreen(screen));
+}
+
+function sendScreenChanged(screen) {
+  everyone.now.screenChanged(_getWireSafeScreen(screen));
+}
+
+function sendScreenRemoved(screen) {
+  everyone.now.screenRemoved(_getWireSafeScreen(screen));
+}
