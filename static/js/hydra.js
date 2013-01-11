@@ -41,8 +41,7 @@ $(function() {
           width: iframeWidth + '%',
           height: iframeHeight + '%',
           float: 'left',
-          border: 0,
-          'pointer-events': 'none'
+          border: 0
         })
     );
   }

@@ -76,7 +76,7 @@ cycleScreen = function(screen_id) {
 
   sendScreenChanged(screen);
 
-  screen.timeout = setTimeout(cycleScreen.bind(this, screen_id),
+  screen.timeout = setTimeout(cycleScreen.bind(null, screen_id),
     config.resetTime);
 };
 
@@ -96,7 +96,7 @@ exports.setUrl = function(url, screen_name, callback) {
     screen.content = content;
     sendScreenChanged(screen);
     clearTimeout(screen.timeout);
-    screen.timeout = setTimeout(cycleScreen.bind(this, screen.id),
+    screen.timeout = setTimeout(cycleScreen.bind(null, screen.id),
       config.resetTime);
     utils.async(callback, content);
   });
@@ -219,15 +219,6 @@ function contentForUrl(url, callback) {
 /********** Now.js connections **********/
 // Now.js sometimes has some different calling conventions, so translate.
 
-everyone.now.getScreens = function(callback) {
-  var screens = exports.getScreens();
-  utils.async(callback, screens);
-};
-
-everyone.now.addScreen = exports.addScreen;
-
-everyone.now.removeScreen = removeScreen;
-
 // Screen objects store some things that can't go over the wire. So don't
 // include those.
 function _getWireSafeScreen(screen) {
@@ -237,6 +228,16 @@ function _getWireSafeScreen(screen) {
     'content': screen.content
   };
 }
+
+everyone.now.getScreens = function(callback) {
+  var screens = exports.getScreens();
+  screens = _.map(screens, _getWireSafeScreen);
+  utils.async(callback, screens);
+};
+
+everyone.now.addScreen = exports.addScreen;
+
+everyone.now.removeScreen = removeScreen;
 
 function sendScreenAdded(screen) {
   everyone.now.screenAdded(_getWireSafeScreen(screen));

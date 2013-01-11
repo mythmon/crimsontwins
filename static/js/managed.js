@@ -94,6 +94,7 @@ function makeSelector() {
         now.addScreen('herpderp ' + (new Date()).getMilliseconds());
       }));
 
+    /*
     $selectorUl.append(makeScreenPreview({
         name: 'Hydra mode',
         content: {type: 'html', html: '<i class="hydra">'}
@@ -103,6 +104,8 @@ function makeSelector() {
         ev.preventDefault();
         console.log('hyrda clicked');
       }));
+    */
+
     $('body').append($selector);
   });
 }
