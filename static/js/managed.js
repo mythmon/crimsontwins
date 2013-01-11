@@ -72,6 +72,7 @@ function init() {
 }
 
 function makeSelector() {
+  $('.wrap').remove();
   var $selector = $('<div>', {'class': 'selector'});
   var $selectorUl = $('<ul>');
 
@@ -155,8 +156,26 @@ function selectScreen($elem) {
       height: window.innerHeight
     });
 
-  $('.selector').hide();
+  $('.selector').remove();
   $('body').append($wrap);
+
+  var hash = '#screen={name}'.format(screen);
+  window.history.pushState({screen: screen}, screen.name, hash);
+}
+
+window.onpopstate = function(ev) {
+  var $elem;
+  if (!ev.state) {
+    $elem = [];
+  } else {
+    var $elem = $('.preview[name={name}]'.format(ev.state.screen));
+  }
+
+  if ($elem.length > 0) {
+    selectScreen($elem.first());
+  } else {
+    makeSelector();
+  }
 }
 
 /******** Now.js connections ********/
@@ -189,7 +208,14 @@ now.ready(function() {
   };
 
   now.screenRemoved = function(screen) {
+    var makeIt = false;
+    if ($('wrap[name=screen-{id}]'.length > 0)) {
+      makeIt = true;
+    }
     $('[name=screen-{id}]'.format(screen)).remove();
+    if (makeIt) {
+      makeSelector();
+    }
   };
 
   ready('now');
