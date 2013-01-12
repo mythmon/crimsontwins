@@ -83,6 +83,12 @@ cycleScreen = function(screen_id) {
 /* Put new content on the next screen in the line up. */
 exports.setUrl = function(url, screen_name, callback) {
   var screen;
+
+  if (screens.length === 0) {
+    utils.async(callback, {msg: 'No screens.'});
+    return;
+  }
+
   if (screen_name) {
     screen = findScreen('name', screen_name, true);
   }

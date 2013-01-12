@@ -10,13 +10,14 @@ exports.all.push(function blacklistNoodle(opts) {
   }
 });
 
-var youtube_re = RegExp('(youtube.com/watch\\?v=([A-Za-z0-9]+))|(youtu.be/([A-Za-z0-9]+))');
+var youtube_re = RegExp('(youtube.com/watch\\?v=([A-Za-z0-9_]+))|(youtu.be/([A-Za-z0-9]+))');
 exports.all.push(function embedYoutube(opts) {
   var match = youtube_re.exec(opts.url);
   if (match) {
     var id = match[2] || match[4];
     return {
-      url: 'http://www.youtube.com/embed/' + id + '?rel=0&autoplay=1'
+      url: 'http://www.youtube.com/embed/' + id + '?rel=0&autoplay=1',
+      type: 'url'
     };
   }
 });
