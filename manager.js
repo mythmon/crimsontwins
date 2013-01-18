@@ -30,6 +30,7 @@ var contentSet = [];
 _.each(config.resetUrls, function(url) {
   contentForUrl(url, Array.prototype.push.bind(contentSet));
 });
+utils.shuffle(contentSet);
 
 exports.addScreen = function(name) {
   var id = utils.getId();
