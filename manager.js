@@ -180,7 +180,7 @@ function contentForUrl(url, callback) {
     if (res.statusCode >= 300 && res.statusCode < 400) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
-      return _processUrl(headers.location, callback);
+      return contentForUrl(headers.location, callback);
     }
 
     if (res.statusCode >= 400) {
