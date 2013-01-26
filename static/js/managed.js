@@ -92,7 +92,8 @@ function makeSelector() {
       .on('click', function(ev) {
         console.log('new clicked');
         ev.preventDefault();
-        now.addScreen('herpderp ' + (new Date()).getMilliseconds());
+        var name = prompt('Screen name?');
+        now.addScreen(name);
       }));
 
     /*
@@ -143,14 +144,19 @@ function makeScreenPreview(screen, events) {
   return $elem;
 }
 
+var seletedScreenTemplate =
+  '<div class="wrap" name="screen-{id}">' +
+    '<div class="content"></div>' +
+    '<div class="meta">' +
+      '<span class="name">{name}</span>' +
+      '<span class="url">{content.url}</span>' +
+    '</div>' +
+  '</div>';
+
 function selectScreen($elem) {
   var screen = $elem.data('screen');
-  $wrap = $('<div>', {
-      'class': 'wrap',
-      'name': 'screen-' + screen.id
-    })
-    .append($('<div class="content"/>')
-      .html(elementFor(screen.content)))
+  $wrap = $(seletedScreenTemplate.format(screen))
+    .find('.content').html(elementFor(screen.content)).end()
     .css({
       width: window.innerWidth,
       height: window.innerHeight

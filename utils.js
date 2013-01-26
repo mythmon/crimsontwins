@@ -29,16 +29,24 @@ String.prototype.format = function(obj) {
   var args = arguments;
   var str = this;
   // Support either an object, or a series.
-  return str.replace(/\{[\w\d_-]+\}/g, function(part) {
+  return str.replace(/\{[\w\d\._-]+\}/g, function(part) {
     // Strip off {}.
     part = part.slice(1, -1);
     var index = parseInt(part, 10);
     if (isNaN(index)) {
-      return obj[part];
+      return exports.dottedGet(obj, part);
     } else {
       return args[index];
     }
   });
+};
+
+exports.dottedGet = function(obj, selector) {
+  selector = selector.split('.');
+  while (selector.length) {
+    obj = obj[selector.splice(0, 1)[0]];
+  }
+  return obj;
 };
 
 var _nextId = 0;
