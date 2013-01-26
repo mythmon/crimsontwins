@@ -63,7 +63,7 @@ findScreen = function(key, value, moveNextScreen) {
     }
   });
   if (moveNextScreen && index === nextScreen) {
-    nextScreen = (nextScreen + 1) % screen.length;
+    nextScreen = (nextScreen + 1) % screens.length;
   }
   return found;
 };
@@ -82,7 +82,7 @@ cycleScreen = function(screen_id) {
 };
 
 /* Put new content on the next screen in the line up. */
-exports.setUrl = function(url, screen_name, callback) {
+exports.setUrl = function(url, screenName, callback) {
   var screen;
 
   if (screens.length === 0) {
@@ -90,8 +90,8 @@ exports.setUrl = function(url, screen_name, callback) {
     return;
   }
 
-  if (screen_name) {
-    screen = findScreen('name', screen_name, true);
+  if (screenName) {
+    screen = findScreen('name', screenName, true);
   }
   // The above loop might fail, so check for that.
   if (screen === undefined) {
@@ -109,11 +109,30 @@ exports.setUrl = function(url, screen_name, callback) {
   });
 };
 
-exports.reset = function() {
-  _.each(screens, function(screen) {
+exports.reset = function(screenName) {
+  var screen;
+
+  if (screens.length === 0) {
+    utils.async(callback, {msg: 'No screens.'});
+    return;
+  }
+
+  if (screenName) {
+    screen = findScreen('name', screenName, true);
+  }
+
+  if (screen === undefined) {
+    screen = screens[nextScreen];
+    nextScreen = (nextScreen + 1) % screens.length;
+
+    _.each(screens, function(screen) {
+      screen.content = getDefaultContent();
+      sendScreenChanged(screen);
+    });
+  } else {
     screen.content = getDefaultContent();
     sendScreenChanged(screen);
-  });
+  }
 };
 
 function getDefaultContent() {
