@@ -33,6 +33,10 @@ _.each(config.resetUrls, function(url) {
 utils.shuffle(contentSet);
 
 exports.addScreen = function(name) {
+  if (findScreen('name', name)) {
+    // No duplicate names.
+    throw "Duplicate screen name.";
+  }
   var id = utils.getId();
   var screen = {
     id: id,
@@ -56,8 +60,17 @@ removeScreen = function(id) {
 
 findScreen = function(key, value, moveNextScreen) {
   var found, index;
+
+  if (value.toLowerCase !== undefined) {
+    value = value.toLowerCase();
+  }
+
   _.each(screens, function(s, i) {
-    if (s[key] === value) {
+    var screenVal = s[key];
+    if (screenVal.toLowerCase !== undefined) {
+      screenVal = screenVal.toLowerCase();
+    }
+    if (screenVal === value) {
       found = s;
       index = i;
     }
