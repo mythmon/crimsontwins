@@ -1,23 +1,5 @@
 (function() {
 
-var containerIndex = 0;
-var $containers = $('.container');
-
-function updateContents($element) {
-  $prev = $containers.slice(containerIndex, containerIndex+1);
-  containerIndex = (containerIndex + 1) % $containers.length;
-  $next = $containers.slice(containerIndex, containerIndex+1);
-
-  $next.html($element);
-
-  $next.css('opacity', 1.0);
-  $prev.css('opacity', 0.0);
-
-  $prev.once('transitioned', function() {
-    $prev.html('');
-  });
-}
-
 function elementFor(content) {
   if (content.type == 'url') {
     return $('<iframe>', {
@@ -68,11 +50,11 @@ function ready(part) {
 }
 
 function init() {
-  makeSelector();
+  makeSelectors();
 }
 
-function makeSelector() {
-  $('.wrap').remove();
+function makeSelectors() {
+  $('.wrap, .selector').remove();
   var $selector = $('<div>', {'class': 'selector'});
   var $selectorUl = $('<ul>');
 
@@ -162,7 +144,7 @@ function selectScreen($elem) {
       height: window.innerHeight
     });
 
-  $('.selector').remove();
+  $('.selector, .wrap').remove();
   $('body').append($wrap);
 
   var hash = '#screen={name}'.format(screen);
@@ -174,28 +156,18 @@ window.onpopstate = function(ev) {
   if (!ev.state) {
     $elem = [];
   } else {
-    var $elem = $('.preview[name={name}]'.format(ev.state.screen));
+    $elem = $('.preview[name={name}]'.format(ev.state.screen));
   }
 
   if ($elem.length > 0) {
     selectScreen($elem.first());
   } else {
-    makeSelector();
+    makeSelectors();
   }
-}
+};
 
 /******** Now.js connections ********/
 now.ready(function() {
-  now.setUrl = function(url) {
-    console.log('Loading url in iframe');
-    updateContents(elementFor({type: 'html', url: url}));
-  };
-
-  now.setImage = function(url) {
-    console.log('Loading image');
-    updateContents(elementFor({type: 'image', url: url}));
-  };
-
   now.reset = function() {
     console.log('reset');
     window.location.reload();
@@ -221,7 +193,7 @@ now.ready(function() {
     }
     $('[name=screen-{id}]'.format(screen)).remove();
     if (makeIt) {
-      makeSelector();
+      makeSelectors();
     }
   };
 
