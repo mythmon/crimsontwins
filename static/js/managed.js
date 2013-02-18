@@ -210,6 +210,7 @@ now.ready(function() {
     console.log("Changing screen: " + JSON.stringify(screen));
     $preview = $('[name=screen-{id}]'.format(screen));
     $preview.find('.content').html(elementFor(screen.content));
+    $preview.find('.meta .url').text(screen.content.url);
     $preview.data('screen', screen);
   };
 
