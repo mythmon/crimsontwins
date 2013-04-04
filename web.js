@@ -14,22 +14,3 @@ app.configure(function() {
 exports.server = http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
-
-
-/*
-
-var http = require('http');
-
-var config = require('./config');
-
-
-// Web server
-var files = new (nodestatic.Server)('./static');
-
-exports.httpServer = http.createServer(function(request, response) {
-  request.addListener('end', function() {
-    files.serve(request, response);
-  });
-}).listen(config.web.port);
-
-*/
