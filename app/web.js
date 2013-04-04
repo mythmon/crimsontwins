@@ -8,7 +8,7 @@ var app = express();
 app.set('port', config.web.port);
 
 app.configure(function() {
-  app.use('/', express.static(__dirname + '/static'));
+  app.use('/', express.static(__dirname + '/../static'));
 });
 
 exports.server = http.createServer(app).listen(app.get('port'), function() {

@@ -5,22 +5,23 @@ var path = require('path');
 
 // Configuration
 var defaults = {
-    irc: {
-        nick: 'crimsontwins'
-    },
-    web: {
-        port: 8080
-    },
-    "resetTime": 60000,
-    "resetUrls": []
+  irc: {
+      nick: 'crimsontwins'
+  },
+  web: {
+      port: 8080
+  },
+  "resetTime": 60000,
+  "resetUrls": []
 };
 
 var existsSync = fs.existsSync || path.existsSync;
 
-var config;
+var config, json;
 
-if (existsSync('./config.json')) {
-  config = require('./config.json');
+if (existsSync('config.json')) {
+  json = fs.readFileSync('config.json');
+  config = JSON.parse(json);
 } else {
   config = {};
 }

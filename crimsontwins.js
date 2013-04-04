@@ -1,3 +1,3 @@
-require('./config');
-require('./manager');
-require('./chat');
+require('./app/config');
+require('./app/manager');
+require('./app/chat');
