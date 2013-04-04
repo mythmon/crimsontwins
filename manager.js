@@ -5,10 +5,9 @@ var https = require('https');
 
 var config = require('./config.js');
 var utils = require('./utils');
-var clientConnection = require('./clientConnection');
+var clients = require('./clients');
 var modifiers = require('./modifiers');
-
-var everyone = clientConnection.everyone;
+var io = require('./clients').io;
 
 /* Manages clients, screens, and content.
  *
@@ -255,12 +254,20 @@ function contentForUrl(url, callback) {
   req.end();
 }
 
-/********** Now.js connections **********/
-// Now.js sometimes has some different calling conventions, so translate.
+/* Socket.IO connections */
+io.sockets.on('connection', function(socket) {
 
-// Screen objects store some things that can't go over the wire. So don't
-// include those.
-function _getWireSafeScreen(screen) {
+  socket.on('addScreen', exports.addScreen);
+  socket.on('removeScreen', removeScreen);
+  socket.on('getScreens', function(data, cb) {
+    var screens = _.map(exports.getScreens(), serializeScreen);
+    cb(screens);
+  });
+});
+
+// Screen objects store some things that can't be easily seralized. So
+// don't include those.
+function serializeScreen(screen) {
   return {
     'id': screen.id,
     'name': screen.name,
@@ -268,24 +275,14 @@ function _getWireSafeScreen(screen) {
   };
 }
 
-everyone.now.getScreens = function(callback) {
-  var screens = exports.getScreens();
-  screens = _.map(screens, _getWireSafeScreen);
-  utils.async(callback, screens);
-};
-
-everyone.now.addScreen = exports.addScreen;
-
-everyone.now.removeScreen = removeScreen;
-
 function sendScreenAdded(screen) {
-  everyone.now.screenAdded(_getWireSafeScreen(screen));
+  io.sockets.emit('screenAdded', serializeScreen(screen));
 }
 
 function sendScreenChanged(screen) {
-  everyone.now.screenChanged(_getWireSafeScreen(screen));
+  io.sockets.emit('screenChanged', serializeScreen(screen));
 }
 
 function sendScreenRemoved(screen) {
-  everyone.now.screenRemoved(_getWireSafeScreen(screen));
+  io.sockets.emit('screenRemoved', serializeScreen(screen));
 }

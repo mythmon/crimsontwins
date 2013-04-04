@@ -1,5 +1,7 @@
 (function() {
 
+var socket;
+
 function elementFor(content) {
   if (content.type == 'url') {
     return $('<iframe>', {
@@ -32,14 +34,14 @@ $(function() {
 
   $(document).keyup(function(e) {
     if (e.keyCode == 27) { // Esc
-      now.reset();
+      window.location.reload();
     }
   });
 
   ready('dom');
 });
 
-readyParts = ['dom', 'now'];
+readyParts = ['dom', 'socket'];
 function ready(part) {
   if (readyParts.indexOf(part) >= 0) {
     readyParts = _.without(readyParts, part);
@@ -61,7 +63,7 @@ function makeSelectors() {
   $selector.append('<h1>Select a screen to view</h1>');
   $selector.append($selectorUl);
 
-  var screens = now.getScreens(function(screens) {
+  socket.emit('getScreens', null, function(screens) {
     _.each(screens, function(screen) {
       $selectorUl.append(makeScreenPreview(screen));
     });
@@ -75,7 +77,7 @@ function makeSelectors() {
         console.log('new clicked');
         ev.preventDefault();
         var name = prompt('Screen name?');
-        now.addScreen(name);
+        socket.emit('addScreen', name);
       }));
 
     /*
@@ -119,7 +121,7 @@ function makeScreenPreview(screen, events) {
         //.on('click', now.removeScreen.bind(this, screen.id)));
         .on('click', function() {
           console.log('removing screen');
-          now.removeScreen(screen.id);
+          socket.emit('removeScreen', screen.id);
         }));
   }
   $elem.children('.content').html(elementFor(screen.content));
@@ -166,38 +168,38 @@ window.onpopstate = function(ev) {
   }
 };
 
-/******** Now.js connections ********/
-now.ready(function() {
-  now.reset = function() {
-    console.log('reset');
-    window.location.reload();
-  };
+/* Socket.IO connections */
+socket = io.connect('/');
 
-  now.screenAdded = function(screen) {
-    console.log("Adding screen: " + JSON.stringify(screen));
-    $('.selector .meta').first().before(makeScreenPreview(screen));
-  };
-
-  now.screenChanged = function(screen) {
-    console.log("Changing screen: " + JSON.stringify(screen));
-    $preview = $('[name=screen-{id}]'.format(screen));
-    $preview.find('.content').html(elementFor(screen.content));
-    $preview.find('.meta .url').text(screen.content.url);
-    $preview.data('screen', screen);
-  };
-
-  now.screenRemoved = function(screen) {
-    var makeIt = false;
-    if ($('wrap[name=screen-{id}]'.length > 0)) {
-      makeIt = true;
-    }
-    $('[name=screen-{id}]'.format(screen)).remove();
-    if (makeIt) {
-      makeSelectors();
-    }
-  };
-
-  ready('now');
+socket.on('reset', function() {
+  console.log('reset');
+  window.location.reload();
 });
+
+socket.on('screenAdded', function(screen) {
+  console.log("Adding screen: " + JSON.stringify(screen));
+  $('.selector .meta').first().before(makeScreenPreview(screen));
+});
+
+socket.on('screenChanged', function(screen) {
+  console.log("Changing screen: " + JSON.stringify(screen));
+  $preview = $('[name=screen-{id}]'.format(screen));
+  $preview.find('.content').html(elementFor(screen.content));
+  $preview.find('.meta .url').text(screen.content.url);
+  $preview.data('screen', screen);
+});
+
+socket.on('screenRemoved', function(screen) {
+  var makeIt = false;
+  if ($('wrap[name=screen-{id}]'.length > 0)) {
+    makeIt = true;
+  }
+  $('[name=screen-{id}]'.format(screen)).remove();
+  if (makeIt) {
+    makeSelectors();
+  }
+});
+
+ready('socket');
 
 })();
