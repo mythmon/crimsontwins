@@ -22,7 +22,7 @@ exports.all.push(function embedYoutube(opts) {
   }
 });
 
-var imgur_re = RegExp('imgur.com/([A-Za-z0-9]+)');
+var imgur_re = RegExp('imgur.com.*/([A-Za-z0-9]+)$');
 exports.all.push(function unpackImgur(opts) {
   var match = opts.url.match(imgur_re);
   if (match) {
