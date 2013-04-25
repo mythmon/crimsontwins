@@ -197,13 +197,13 @@ function contentForUrl(url) {
 
   var components = uri.parse(url);
   if (components.errors.length) {
-    p.resolve({
+    p.reject({
       message: "We couldn't parse a url from that."
     });
     return p;
   }
   if (components.host === undefined) {
-    p.resolve({
+    p.reject({
       message: "Couldn't load URL. (Maybe a bad redirect?)"
     });
     return p;
@@ -246,12 +246,14 @@ function contentForUrl(url) {
     if (res.statusCode >= 300 && res.statusCode < 400) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
-      contentForUrl(headers.location).then(p.resolve);
+      var newP = contentForUrl(headers.location);
+      newP.then(p.resolve);
+      newP.error(p.reject);
       return;
     }
 
     if (res.statusCode >= 400) {
-      p.resolve({
+      p.reject({
         message: 'There was a problem with the url (' + res.statusCode + ')'
       });
       return;
@@ -268,7 +270,7 @@ function contentForUrl(url) {
 
     var xframe = (headers['x-frame-options'] || '').toLowerCase();
     if (xframe === 'sameorigin' || xframe === 'deny') {
-      p.resolve({
+      p.reject({
         message: "That site prevents framing. It won't work."
       });
       return;
