@@ -280,8 +280,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('addScreen', exports.addScreen);
   socket.on('removeScreen', removeScreen);
   socket.on('getScreens', function(d, cb) {
-    var screens = _.map(screens, serializeScreen);
-    cb(screens);
+    cb(_.map(screens, serializeScreen));
   });
 
   socket.on('getContentSet', function(d, cb) {

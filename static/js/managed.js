@@ -65,6 +65,7 @@ function makeSelectors() {
   $selector.append($selectorUl);
 
   socket.emit('getScreens', null, function(screens) {
+    console.log(screens);
     _.each(screens, function(screen) {
       $selectorUl.append(makeScreenPreview(screen));
     });
@@ -119,7 +120,6 @@ function makeScreenPreview(screen, events) {
     });
     $elem.find('h1').append(
       $('<button class="close">X</button>')
-        //.on('click', now.removeScreen.bind(this, screen.id)));
         .on('click', function() {
           console.log('removing screen');
           socket.emit('removeScreen', screen.id);
@@ -130,7 +130,7 @@ function makeScreenPreview(screen, events) {
 }
 
 var selectedScreenTemplate =
-  '<div class="wrap" name="screen-{id}">' +
+  '<div class="overlay" name="screen-{id}">' +
     '<div class="content"></div>' +
     '<div class="meta">' +
       '<span class="name">{name}</span>' +
@@ -147,7 +147,6 @@ function selectScreen($elem) {
       height: window.innerHeight
     });
 
-  $('.selector, .wrap').remove();
   $('body').append($wrap);
 
   var hash = '#screen={name}'.format(screen);
