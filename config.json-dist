@@ -8,5 +8,6 @@
         "port": 8080
     },
     "resetTime": 60000,
-    "resetUrls": []
+    "resetUrls": [],
+    "screens": ["screen1"]
 }

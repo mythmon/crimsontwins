@@ -23,6 +23,12 @@ var contentSet = [];
 var nextContent = 0;
 
 
+function init() {
+  loadContent();
+  setupScreens();
+}
+
+
 function loadContent() {
   var promises = [];
   var p;
@@ -37,14 +43,21 @@ function loadContent() {
   return promise.all(promises);
 }
 
-loadContent();
+
+function setupScreens() {
+  _.each(config.screens, function(screenName) {
+    exports.addScreen(screenName);
+  });
+  console.log(config.screens);
+}
 
 
 exports.addScreen = function(name) {
-  if (findScreen('name', name)) {
-    // No duplicate names.
-    throw "Duplicate screen name.";
+  if (!name || findScreen('name', name)) {
+    // Duplicate and empty names are both bad. Stop that.
+    return;
   }
+
   var id = utils.getId();
   var screen = {
     id: id,
@@ -52,17 +65,25 @@ exports.addScreen = function(name) {
     content: null,
     resetId: null
   };
+
   screens.push(screen);
   cycleScreen(screen.id);
   sendScreenAdded(screen);
+
+  console.log(config.screens);
+  config.screens = _.map(screens, function(s) { return s.name; });
+  config.save();
 };
 
-removeScreen = function(id) {
+exports.removeScreen = function(id) {
   var screen = findScreen('id', id);
   if (screen !== undefined) {
     clearTimeout(screen.timeout);
     screens = _.without(screens, screen);
     sendScreenRemoved(screen);
+
+    config.screens = _.map(screens, function(s) { return s.name; });
+    config.save();
   }
 };
 
@@ -278,7 +299,7 @@ function contentForUrl(url) {
 io.sockets.on('connection', function(socket) {
 
   socket.on('addScreen', exports.addScreen);
-  socket.on('removeScreen', removeScreen);
+  socket.on('removeScreen', exports.removeScreen);
   socket.on('getScreens', function(d, cb) {
     cb(_.map(screens, serializeScreen));
   });
@@ -313,3 +334,6 @@ function sendScreenChanged(screen) {
 function sendScreenRemoved(screen) {
   io.sockets.emit('screenRemoved', serializeScreen(screen));
 }
+
+
+init();

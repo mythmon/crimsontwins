@@ -30,5 +30,5 @@ config = _.extend(exports, defaults, config);
 
 config.save = function(cb) {
   var confStr = JSON.stringify(config, null, 4);
-  fs.writeFile('config_out.json', confStr, cb);
+  fs.writeFile('config.json', confStr, cb);
 };

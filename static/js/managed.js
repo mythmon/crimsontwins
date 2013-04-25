@@ -31,6 +31,9 @@ function ready(part) {
 }
 
 function elementFor(content) {
+  if (content === undefined) {
+    return $('<div>');
+  }
   if (content.type == 'url') {
     return $('<iframe>', {
       sandbox: 'allow-same-origin allow-scripts allow-forms',
