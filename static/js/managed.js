@@ -2,6 +2,34 @@
 
 var socket;
 
+// Trigger DOM ready event.
+$(ready.bind(window, 'dom'));
+
+function init() {
+  $(window).on('resize', resize);
+  resize();
+
+  $(document).keyup(function(e) {
+    if (e.keyCode == 27) { // Esc
+      window.location.reload();
+    }
+  });
+
+  makeSelectors();
+  makeAdmin();
+}
+
+// When all readyParts are reported as ready, call init().
+var readyParts = ['dom', 'socket'];
+function ready(part) {
+  if (readyParts.indexOf(part) >= 0) {
+    readyParts = _.without(readyParts, part);
+    if (!readyParts.length) {
+      init();
+    }
+  }
+}
+
 function elementFor(content) {
   if (content.type == 'url') {
     return $('<iframe>', {
@@ -26,33 +54,6 @@ function resize() {
     width: window.innerWidth,
     height: window.innerHeight
   });
-}
-
-$(function() {
-  $(window).on('resize', resize);
-  resize();
-
-  $(document).keyup(function(e) {
-    if (e.keyCode == 27) { // Esc
-      window.location.reload();
-    }
-  });
-
-  ready('dom');
-});
-
-readyParts = ['dom', 'socket'];
-function ready(part) {
-  if (readyParts.indexOf(part) >= 0) {
-    readyParts = _.without(readyParts, part);
-    if (!readyParts.length) {
-      init();
-    }
-  }
-}
-
-function init() {
-  makeSelectors();
 }
 
 function makeSelectors() {
@@ -92,8 +93,9 @@ function makeSelectors() {
       }));
     */
 
-    $('body').append($selector);
   });
+
+  $('body').append($selector);
 }
 
 var screenPreviewTemplate =
@@ -151,6 +153,60 @@ function selectScreen($elem) {
 
   var hash = '#screen={name}'.format(screen);
   window.history.pushState({screen: screen}, screen.name, hash);
+}
+
+
+var adminTemplate =
+  '<div class="admin">' +
+    '<h1>Admin</h1>' +
+    '<div class="contentUI">' +
+      '<h2>Default Content</h2>' +
+      '<ul></ul>' +
+      '<button class="add">Add</button>' +
+      '<button class="save">Save</button>' +
+    '</div>' +
+  '</div>';
+
+var contentRowTemplate =
+  '<li class="content-row">' +
+    '<button class="remove">Remove</button>' +
+    '<input type="text" name="url" value="{url}" />' +
+  '</li>';
+
+
+function makeAdmin() {
+  $('.admin').remove();
+  var $admin = $(adminTemplate);
+
+  var $contentUl = $admin.find('.contentUI ul');
+  console.log('making admin');
+  socket.emit('getContentSet', null, function(contentSet) {
+    console.log('contentSet: ' + contentSet);
+    _.each(contentSet, function(content) {
+      console.log('content: ' + content);
+      $contentUl.append($(contentRowTemplate.format(content)));
+    });
+  });
+
+  $admin.on('click', '.contentUI .content-row .remove', function(ev) {
+    $(this).parent().remove();
+  });
+  $admin.on('click', '.contentUI .add', function(ev) {
+    $(this).siblings('ul').append(contentRowTemplate.format({url: ''}));
+  });
+  $admin.on('click', '.contentUI .save', function(ev) {
+    var urls = [];
+    $(this).siblings('ul').children('li').each(function() {
+      var url = $(this).find('input[name=url]').val();
+      if (url.length) {
+        urls.push(url);
+      }
+    });
+    console.log(urls);
+    socket.emit('setContentSetUrls', urls);
+  });
+
+  $('body').append($admin);
 }
 
 window.onpopstate = function(ev) {

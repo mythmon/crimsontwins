@@ -2,6 +2,7 @@ var _ = require('underscore');
 var uri = require('uri-js');
 var http = require('http');
 var https = require('https');
+var promise = require('node-promise');
 
 var config = require('./config.js');
 var utils = require('./utils');
@@ -18,18 +19,26 @@ var io = require('./clients').io;
 
 var screens = [];
 var nextScreen = 0;
-
-/* This is a now.js function. */
-exports.getScreens = function() {
-  return screens;
-};
-
-var nextContent = 0;
 var contentSet = [];
-_.each(config.resetUrls, function(url) {
-  contentForUrl(url, Array.prototype.push.bind(contentSet));
-});
-utils.shuffle(contentSet);
+var nextContent = 0;
+
+
+function loadContent() {
+  var promises = [];
+  var p;
+
+  contentSet = [];
+  _.each(config.resetUrls, function(url) {
+    p = contentForUrl(url);
+    promises.push(p);
+    p.then(Array.prototype.push.bind(contentSet));
+  });
+
+  return promise.all(promises);
+}
+
+loadContent();
+
 
 exports.addScreen = function(name) {
   if (findScreen('name', name)) {
@@ -94,12 +103,12 @@ cycleScreen = function(screen_id) {
 };
 
 /* Put new content on the next screen in the line up. */
-exports.setUrl = function(url, screenName, callback) {
-  var screen;
+exports.setUrl = function(url, screenName) {
+  var screen, p = new promise.Promise();
 
   if (screens.length === 0) {
-    utils.async(callback, {msg: 'No screens.'});
-    return;
+    p.resolve({msg: 'No screens.'});
+    return p;
   }
 
   if (screenName) {
@@ -111,22 +120,25 @@ exports.setUrl = function(url, screenName, callback) {
     nextScreen = (nextScreen + 1) % screens.length;
   }
 
-  contentForUrl(url, function(content) {
+  contentForUrl(url).then(function(content) {
     screen.content = content;
     sendScreenChanged(screen);
     clearTimeout(screen.timeout);
     screen.timeout = setTimeout(cycleScreen.bind(null, screen.id),
-      config.resetTime);
-    utils.async(callback, content);
+                                config.resetTime);
+
+    p.resolve(content);
   });
+
+  return p;
 };
 
 exports.reset = function(screenName) {
-  var screen;
+  var screen, p = new promise.Promise();
 
   if (screens.length === 0) {
-    utils.async(callback, {msg: 'No screens.'});
-    return;
+    p.resolve({msg: 'No screens.'});
+    return p;
   }
 
   if (screenName) {
@@ -156,29 +168,32 @@ function getDefaultContent() {
   return content;
 }
 
-function contentForUrl(url, callback) {
+function contentForUrl(url) {
+  var p = new promise.Promise();
+
   if (url.indexOf('://') === -1) {
     url = 'http://' + url;
   }
 
   var components = uri.parse(url);
   if (components.errors.length) {
-    utils.async(callback, {
+    p.resolve({
       message: "We couldn't parse a url from that."
     });
-    return;
+    return p;
   }
   if (components.host === undefined) {
-    utils.async(callback, {
+    p.resolve({
       message: "Couldn't load URL. (Maybe a bad redirect?)"
     });
+    return p;
   }
 
   for (var i=0; i < modifiers.all.length; i++) {
     var out = modifiers.all[i]({url: url, components: components});
     if (out) {
-      utils.async(callback, out);
-      return;
+      p.resolve(out);
+      return p;
     }
   }
 
@@ -211,11 +226,12 @@ function contentForUrl(url, callback) {
     if (res.statusCode >= 300 && res.statusCode < 400) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
-      return contentForUrl(headers.location, callback);
+      contentForUrl(headers.location).then(p.resolve);
+      return;
     }
 
     if (res.statusCode >= 400) {
-      utils.async(callback, {
+      p.resolve({
         message: 'There was a problem with the url (' + res.statusCode + ')'
       });
       return;
@@ -223,7 +239,7 @@ function contentForUrl(url, callback) {
 
     var contentType = (headers['content-type'] || '').toLowerCase();
     if (contentType.indexOf('image/') === 0) {
-      utils.async(callback, {
+      p.resolve({
         url: url,
         type: 'image'
       });
@@ -232,19 +248,19 @@ function contentForUrl(url, callback) {
 
     var xframe = (headers['x-frame-options'] || '').toLowerCase();
     if (xframe === 'sameorigin' || xframe === 'deny') {
-      utils.async(callback, {
+      p.resolve({
         message: "That site prevents framing. It won't work."
       });
       return;
     }
 
-    utils.async(callback, {type: 'url', url: url});
+    p.resolve({type: 'url', url: url});
   });
 
   req.on('error', function(err) {
     console.log('Problem with HEAD request: ' + err.message);
     // We'll do it live.
-    utils.async(callback, {
+    p.resolve({
       type: 'url',
       url: url,
       message: "We're not sure about that, but we'll give it ago."
@@ -252,6 +268,8 @@ function contentForUrl(url, callback) {
   });
 
   req.end();
+
+  return p;
 }
 
 /* Socket.IO connections */
@@ -262,6 +280,14 @@ io.sockets.on('connection', function(socket) {
   socket.on('getScreens', function(data, cb) {
     var screens = _.map(exports.getScreens(), serializeScreen);
     cb(screens);
+  });
+
+  socket.on('getContentSet', function(d, cb) {
+    cb(contentSet);
+  });
+  socket.on('setContentSetUrls', function(contentUrls) {
+    config.resetUrls = contentUrls;
+    loadContent().then(config.save());
   });
 });
 
