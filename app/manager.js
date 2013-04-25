@@ -69,6 +69,8 @@ removeScreen = function(id) {
 findScreen = function(key, value, moveNextScreen) {
   var found, index;
 
+  if (value === undefined) return undefined;
+
   if (value.toLowerCase !== undefined) {
     value = value.toLowerCase();
   }
@@ -277,8 +279,8 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('addScreen', exports.addScreen);
   socket.on('removeScreen', removeScreen);
-  socket.on('getScreens', function(data, cb) {
-    var screens = _.map(exports.getScreens(), serializeScreen);
+  socket.on('getScreens', function(d, cb) {
+    var screens = _.map(screens, serializeScreen);
     cb(screens);
   });
 

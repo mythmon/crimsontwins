@@ -105,7 +105,6 @@ var screenPreviewTemplate =
   '</li>';
 
 function makeScreenPreview(screen, events) {
-  console.log(arguments);
   if (events === undefined) {
     events = true;
   }
@@ -130,7 +129,7 @@ function makeScreenPreview(screen, events) {
   return $elem;
 }
 
-var seletedScreenTemplate =
+var selectedScreenTemplate =
   '<div class="wrap" name="screen-{id}">' +
     '<div class="content"></div>' +
     '<div class="meta">' +
@@ -141,7 +140,7 @@ var seletedScreenTemplate =
 
 function selectScreen($elem) {
   var screen = $elem.data('screen');
-  $wrap = $(seletedScreenTemplate.format(screen))
+  $wrap = $(selectedScreenTemplate.format(screen))
     .find('.content').html(elementFor(screen.content)).end()
     .css({
       width: window.innerWidth,

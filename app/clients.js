@@ -2,4 +2,6 @@ var socketio = require('socket.io');
 
 var web = require('./web');
 
-exports.io = socketio.listen(web.server);
+var io = socketio.listen(web.server);
+io.set('log level', 2);
+exports.io = io;
