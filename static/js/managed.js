@@ -247,6 +247,7 @@ socket.on('screenChanged', function(screen) {
 });
 
 socket.on('screenRemoved', function(screen) {
+  console.log('Removing screen');
   var makeIt = false;
   if ($('wrap[name=screen-{id}]'.length > 0)) {
     makeIt = true;

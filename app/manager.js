@@ -24,8 +24,7 @@ var nextContent = 0;
 
 
 function init() {
-  loadContent();
-  setupScreens();
+  loadContent().then(setupScreens);
 }
 
 
@@ -48,7 +47,6 @@ function setupScreens() {
   _.each(config.screens, function(screenName) {
     exports.addScreen(screenName);
   });
-  console.log(config.screens);
 }
 
 
@@ -62,7 +60,7 @@ exports.addScreen = function(name) {
   var screen = {
     id: id,
     name: name,
-    content: null,
+    content: {type: 'html', html: '<div>Loading...</div>'},
     resetId: null
   };
 
@@ -70,7 +68,6 @@ exports.addScreen = function(name) {
   cycleScreen(screen.id);
   sendScreenAdded(screen);
 
-  console.log(config.screens);
   config.screens = _.map(screens, function(s) { return s.name; });
   config.save();
 };
@@ -324,6 +321,7 @@ function serializeScreen(screen) {
 }
 
 function sendScreenAdded(screen) {
+  console.log('screenAdded: ' + serializeScreen(screen));
   io.sockets.emit('screenAdded', serializeScreen(screen));
 }
 
