@@ -199,13 +199,13 @@ function contentForUrl(url) {
   if (components.errors.length) {
     p.reject({
       message: "We couldn't parse a url from that."
-    });
+    }, true);
     return p;
   }
   if (components.host === undefined) {
     p.reject({
       message: "Couldn't load URL. (Maybe a bad redirect?)"
-    });
+    }, true);
     return p;
   }
 
@@ -254,7 +254,7 @@ function contentForUrl(url) {
     if (res.statusCode >= 400) {
       p.reject({
         message: 'There was a problem with the url (' + res.statusCode + ')'
-      });
+      }, true);
       return;
     }
 
@@ -271,7 +271,7 @@ function contentForUrl(url) {
     if (xframe === 'sameorigin' || xframe === 'deny') {
       p.reject({
         message: "That site prevents framing. It won't work."
-      });
+      }, true);
       return;
     }
 
