@@ -247,8 +247,7 @@ function contentForUrl(url) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
       var newP = contentForUrl(headers.location);
-      newP.then(p.resolve);
-      newP.fail(p.reject);
+      newP.then(p.resolve, p.reject);
       return;
     }
 
