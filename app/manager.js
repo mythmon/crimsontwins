@@ -148,7 +148,7 @@ exports.setUrl = function(url, screenName) {
                                 config.resetTime);
 
     p.resolve(content);
-  });
+  }, p.reject);
 
   return p;
 };
@@ -166,9 +166,6 @@ exports.reset = function(screenName) {
   }
 
   if (screen === undefined) {
-    screen = screens[nextScreen];
-    nextScreen = (nextScreen + 1) % screens.length;
-
     _.each(screens, function(screen) {
       screen.content = getDefaultContent();
       sendScreenChanged(screen);
@@ -247,7 +244,7 @@ function contentForUrl(url) {
       // redirect, handle it.
       console.log('redirect ' + headers.location);
       var newP = contentForUrl(headers.location);
-      newP.then(p.resolve, p.reject);
+      newP.then(p.resolve, function(data) { p.reject(data, true); });
       return;
     }
 
