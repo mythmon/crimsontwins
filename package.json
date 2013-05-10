@@ -16,7 +16,8 @@
         "socket.io": "0.9.x",
         "express": "3.x",
         "uri-js": "1.4.x",
-        "node-promise": "0.5.x"
+        "node-promise": "0.5.x",
+        "mocha": "1.9.x"
     },
     "engines": {
         "node": ">=0.8.15",
