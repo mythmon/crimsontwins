@@ -3,8 +3,8 @@ var utils = require('../app/utils.js');
 
 
 describe('String', function() {
-  describe('format', function() {
 
+  describe('format', function() {
     it('should format strings in index style', function() {
       assert.equal('Hello, World', '{0}, {1}'.format('Hello', 'World'));
     });
@@ -12,14 +12,14 @@ describe('String', function() {
     it('should format strings in object style', function() {
       assert.equal('Hello, Mike', 'Hello, {name}'.format({name: 'Mike'}));
     });
-
   });
+
 });
 
 
 describe('utils', function() {
-  describe('dottedGet', function() {
 
+  describe('dottedGet', function() {
     it('should get objects one deep', function() {
       var fruit = {apple: 'red', banana: 'yellow'};
       assert.equal('red', utils.dottedGet(fruit, 'apple'));
@@ -32,7 +32,7 @@ describe('utils', function() {
       };
       assert.equal('round', utils.dottedGet(fruit, 'apple.shape'));
     });
-
   });
+
 });
 

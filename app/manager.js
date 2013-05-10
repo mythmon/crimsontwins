@@ -4,11 +4,12 @@ var http = require('http');
 var https = require('https');
 var promise = require('node-promise');
 
-var config = require('./config.js');
+var config = require('./config');
 var utils = require('./utils');
 var clients = require('./clients');
 var modifiers = require('./modifiers');
 var io = require('./clients').io;
+
 
 /* Manages clients, screens, and content.
  *
@@ -21,6 +22,33 @@ var screens = [];
 var nextScreen = 0;
 var contentSet = [];
 var nextContent = 0;
+
+
+function ContentManager() {
+  this.contentUrls = config.resetUrls;
+  this.content = [];
+}
+
+ContentManager.prototype.load = function() {
+  var promises = [];
+  var p;
+  var self = this;
+
+  this.content = [];
+  _.each(this.contentUrls, function(url) {
+    p = contentForUrl(url);
+    promises.push(p);
+    p.then(Array.prototype.push.bind(self.content));
+  });
+
+  return promise.all(promises);
+};
+
+ContentManager.prototype.all = function() {
+  return this.content;
+};
+
+exports.ContentManager = ContentManager;
 
 
 function init() {
@@ -84,7 +112,7 @@ exports.removeScreen = function(id) {
   }
 };
 
-findScreen = function(key, value, moveNextScreen) {
+var findScreen = function(key, value, moveNextScreen) {
   var found, index;
 
   if (value === undefined) return undefined;
@@ -109,7 +137,7 @@ findScreen = function(key, value, moveNextScreen) {
   return found;
 };
 
-cycleScreen = function(screen_id) {
+var cycleScreen = function(screen_id) {
   var screen = findScreen('id', screen_id);
   if (screen === undefined) {
     return;

@@ -17,7 +17,8 @@
         "express": "3.x",
         "uri-js": "1.4.x",
         "node-promise": "0.5.x",
-        "mocha": "1.9.x"
+        "mocha": "1.9.x",
+        "mockery": "1.4.0"
     },
     "engines": {
         "node": ">=0.8.15",
