@@ -2,22 +2,21 @@ var assert = require('assert');
 var utils = require('../app/utils.js');
 
 
-describe('String', function() {
-
-  describe('format', function() {
-    it('should format strings in index style', function() {
-      assert.equal('Hello, World', '{0}, {1}'.format('Hello', 'World'));
-    });
-
-    it('should format strings in object style', function() {
-      assert.equal('Hello, Mike', 'Hello, {name}'.format({name: 'Mike'}));
-    });
-  });
-
-});
-
-
 describe('utils', function() {
+
+  describe('String', function() {
+
+    describe('format', function() {
+      it('should format strings in index style', function() {
+        assert.equal('Hello, World', '{0}, {1}'.format('Hello', 'World'));
+      });
+
+      it('should format strings in object style', function() {
+        assert.equal('Hello, Mike', 'Hello, {name}'.format({name: 'Mike'}));
+      });
+    });
+
+  });
 
   describe('dottedGet', function() {
     it('should get objects one deep', function() {
@@ -31,6 +30,22 @@ describe('utils', function() {
         banana: {color: 'yellow', shape: 'oblong'}
       };
       assert.equal('round', utils.dottedGet(fruit, 'apple.shape'));
+    });
+  });
+
+
+  describe('async', function() {
+    it('should call a function, but not right away', function(done) {
+      var a = 0;
+      function after() {
+        assert.equal(1, a);
+        done();
+      }
+      utils.async(function() {
+        a = 1;
+        after();
+      });
+      assert.equal(0, a);
     });
   });
 

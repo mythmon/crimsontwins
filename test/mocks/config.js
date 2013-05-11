@@ -1,6 +1,6 @@
 var assert = require('assert');
 var _ = require('underscore');
-var originalConfig = require('../app/config');
+var originalConfig = require('../../app/config');
 
 
 // Test Configuration
@@ -11,12 +11,13 @@ var testConfig = {
         channels: ['#channel1', '#channel2']
     },
     web: {
-        port: 8080
+        port: 18080
     },
     resetTime: 60000,
     resetUrls: [
-        'http://example.com/one.gif',
-        'http://example.com/two.gif'
+        'http://example.com/animated.gif',
+        'http://example.com/webpage.html',
+        'http://example.com/image.png'
     ],
     screens: ['screen1']
 };
@@ -30,6 +31,6 @@ _.extend(exports, originalConfig, testConfig);
 
 describe('testConfig', function() {
   it('should have a port', function() {
-    assert.equal(8080, testConfig.web.port);
+    assert.equal(18080, testConfig.web.port);
   });
 });

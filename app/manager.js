@@ -6,9 +6,8 @@ var promise = require('node-promise');
 
 var config = require('./config');
 var utils = require('./utils');
-var clients = require('./clients');
 var modifiers = require('./modifiers');
-var io = require('./clients').io;
+var io = require('./clients').getIO();
 
 
 /* Manages clients, screens, and content.
@@ -24,35 +23,27 @@ var contentSet = [];
 var nextContent = 0;
 
 
-function ContentManager() {
-  this.contentUrls = config.resetUrls;
-  this.content = [];
-}
-
-ContentManager.prototype.load = function() {
-  var promises = [];
-  var p;
-  var self = this;
-
-  this.content = [];
-  _.each(this.contentUrls, function(url) {
-    p = contentForUrl(url);
-    promises.push(p);
-    p.then(Array.prototype.push.bind(self.content));
-  });
-
-  return promise.all(promises);
-};
-
-ContentManager.prototype.all = function() {
-  return this.content;
-};
-
-exports.ContentManager = ContentManager;
-
-
-function init() {
+exports.init = function() {
   loadContent().then(setupScreens);
+
+
+  /* Socket.IO connections */
+  io.sockets.on('connection', function(socket) {
+
+    socket.on('addScreen', exports.addScreen);
+    socket.on('removeScreen', exports.removeScreen);
+    socket.on('getScreens', function(d, cb) {
+      cb(_.map(screens, serializeScreen));
+    });
+
+    socket.on('getContentSet', function(d, cb) {
+      cb(contentSet);
+    });
+    socket.on('setContentSetUrls', function(contentUrls) {
+      config.resetUrls = contentUrls;
+      loadContent().then(config.save());
+    });
+  });
 }
 
 
@@ -112,7 +103,7 @@ exports.removeScreen = function(id) {
   }
 };
 
-var findScreen = function(key, value, moveNextScreen) {
+function findScreen(key, value, moveNextScreen) {
   var found, index;
 
   if (value === undefined) return undefined;
@@ -135,9 +126,9 @@ var findScreen = function(key, value, moveNextScreen) {
     nextScreen = (nextScreen + 1) % screens.length;
   }
   return found;
-};
+}
 
-var cycleScreen = function(screen_id) {
+function cycleScreen(screen_id) {
   var screen = findScreen('id', screen_id);
   if (screen === undefined) {
     return;
@@ -148,7 +139,7 @@ var cycleScreen = function(screen_id) {
 
   screen.timeout = setTimeout(cycleScreen.bind(null, screen_id),
     config.resetTime);
-};
+}
 
 /* Put new content on the next screen in the line up. */
 exports.setUrl = function(url, screenName) {
@@ -266,11 +257,9 @@ function contentForUrl(url) {
     _.each(res.headers, function(value, key) {
       headers[key.toLowerCase()] = value;
     });
-    console.log(url);
 
     if (res.statusCode >= 300 && res.statusCode < 400) {
       // redirect, handle it.
-      console.log('redirect ' + headers.location);
       var newP = contentForUrl(headers.location);
       newP.then(p.resolve, function(data) { p.reject(data, true); });
       return;
@@ -304,7 +293,6 @@ function contentForUrl(url) {
   });
 
   req.on('error', function(err) {
-    console.log('Problem with HEAD request: ' + err.message);
     // We'll do it live.
     p.resolve({
       type: 'url',
@@ -318,24 +306,6 @@ function contentForUrl(url) {
   return p;
 }
 
-/* Socket.IO connections */
-io.sockets.on('connection', function(socket) {
-
-  socket.on('addScreen', exports.addScreen);
-  socket.on('removeScreen', exports.removeScreen);
-  socket.on('getScreens', function(d, cb) {
-    cb(_.map(screens, serializeScreen));
-  });
-
-  socket.on('getContentSet', function(d, cb) {
-    cb(contentSet);
-  });
-  socket.on('setContentSetUrls', function(contentUrls) {
-    config.resetUrls = contentUrls;
-    loadContent().then(config.save());
-  });
-});
-
 // Screen objects store some things that can't be easily seralized. So
 // don't include those.
 function serializeScreen(screen) {
@@ -347,7 +317,6 @@ function serializeScreen(screen) {
 }
 
 function sendScreenAdded(screen) {
-  console.log('screenAdded: ' + serializeScreen(screen));
   io.sockets.emit('screenAdded', serializeScreen(screen));
 }
 
@@ -358,6 +327,3 @@ function sendScreenChanged(screen) {
 function sendScreenRemoved(screen) {
   io.sockets.emit('screenRemoved', serializeScreen(screen));
 }
-
-
-init();
