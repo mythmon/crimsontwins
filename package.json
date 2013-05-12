@@ -19,7 +19,8 @@
         "node-promise": "0.5.x",
         "mocha": "1.9.x",
         "mockery": "1.4.0",
-        "supertest": "0.6.x"
+        "supertest": "0.6.x",
+        "sinon": "1.7.x"
     },
     "engines": {
         "node": ">=0.8.15",
