@@ -1,3 +1,7 @@
+require('./setup');
+
+var events = require('events');
+
 var assert = require('assert');
 var utils = require('../app/utils.js');
 
@@ -46,6 +50,21 @@ describe('utils', function() {
         after();
       });
       assert.equal(0, a);
+    });
+  });
+
+  describe('eventRelay', function() {
+    it('should relay events', function(done) {
+      var source = new events.EventEmitter();
+      var dest = new events.EventEmitter();
+
+      utils.eventRelay(source, dest, 'foo');
+
+      dest.on('foo', function() {
+        done();
+      });
+
+      source.emit('foo');
     });
   });
 

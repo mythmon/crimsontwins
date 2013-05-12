@@ -27,6 +27,11 @@ var mockHttp = {
       if (match) {
         res.statusCode = parseInt(match[1], 10);
       }
+
+      match = /^\/frame\/(.*)$/.exec(req.path);
+      if (match) {
+        res.headers['x-frame-options'] = match[1];
+      }
     }
 
     if (res.statusCode >= 300 && res.statusCode < 400) {
@@ -35,6 +40,11 @@ var mockHttp = {
     }
 
     utils.async(cb, res);
+
+    return {
+      on: function(){},
+      end: function(){}
+    }
   }
 };
 
@@ -95,5 +105,22 @@ describe('mockHttp', function() {
       };
       http.request(options, cb);
     });
+
+    function frameTest(option) {
+      return function(done) {
+        function cb(res) {
+          assert.equal(option, res.headers['x-frame-options']);
+          done();
+        }
+        var options = {
+          path: '/frame/' + option
+        };
+        http.request(options, cb);
+      };
+    }
+
+    it('should return a frame denying page when requested', frameTest('deny'));
+    it('should return a frame allowing page when requested', frameTest('allow'));
+    it('should return a frame sameorigin page when requested', frameTest('sameorigin'));
   });
 });

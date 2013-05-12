@@ -1,25 +1,14 @@
+require('./setup');
+
 var assert = require('assert');
-var mockery = require('mockery');
 var supertest = require('supertest');
 
-var testConfig = require('./mocks/config');
+var web = require('../app/web');
 
 describe('api', function() {
 
-  var web;
-
   before(function() {
-    mockery.enable();
-    mockery.warnOnUnregistered(false);
-    mockery.registerMock('./config', testConfig);
-
-    web = require('../app/web');
-    web.init();
-  });
-
-  after(function() {
-    mockery.deregisterAll();
-    mockery.disable();
+    web.start();
   });
 
   describe('ping', function() {

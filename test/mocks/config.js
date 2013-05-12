@@ -19,7 +19,7 @@ var testConfig = {
         'http://example.com/webpage.html',
         'http://example.com/image.png'
     ],
-    screens: ['screen1']
+    screens: ['screen1', 'screen2']
 };
 
 testConfig.save = function(cb) {

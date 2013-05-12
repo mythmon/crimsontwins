@@ -68,8 +68,8 @@ function makeSelectors() {
   $selector.append($selectorUl);
 
   socket.emit('getScreens', null, function(screens) {
-    console.log(screens);
     _.each(screens, function(screen) {
+      console.log(screen);
       $selectorUl.append(makeScreenPreview(screen));
     });
 
@@ -180,11 +180,8 @@ function makeAdmin() {
   var $admin = $(adminTemplate);
 
   var $contentUl = $admin.find('.contentUI ul');
-  console.log('making admin');
   socket.emit('getContentSet', null, function(contentSet) {
-    console.log('contentSet: ' + contentSet);
     _.each(contentSet, function(content) {
-      console.log('content: ' + content);
       $contentUl.append($(contentRowTemplate.format(content)));
     });
   });
@@ -234,12 +231,12 @@ socket.on('reset', function() {
 });
 
 socket.on('screenAdded', function(screen) {
-  console.log("Adding screen: " + JSON.stringify(screen));
+  console.log('screenAdded ' + JSON.stringify(screen));
   $('.selector .meta').first().before(makeScreenPreview(screen));
 });
 
 socket.on('screenChanged', function(screen) {
-  console.log("Changing screen: " + JSON.stringify(screen));
+  console.log("screenChanged " + JSON.stringify(screen));
   $preview = $('[name=screen-{id}]'.format(screen));
   $preview.find('.content').html(elementFor(screen.content));
   $preview.find('.meta .url').text(screen.content.url);
@@ -247,7 +244,7 @@ socket.on('screenChanged', function(screen) {
 });
 
 socket.on('screenRemoved', function(screen) {
-  console.log('Removing screen');
+  console.log('screenRemoved ' + JSON.stringify(screen));
   var makeIt = false;
   if ($('wrap[name=screen-{id}]'.length > 0)) {
     makeIt = true;
