@@ -16,7 +16,7 @@ app.set('port', config.web.port);
 app.post('/api/reset', function(req, res) {
   var screenName = req.query.screen || undefined;
 
-  manager.reset(screenName);
+  screenManager.reset(screenName);
 
   res.status(201);
   res.send('');
@@ -32,7 +32,7 @@ app.post('/api/sendurl', function(req, res) {
     return;
   }
 
-  p = manager.setUrl(url, screenName);
+  p = screenManager.sendUrl(url, screenName);
   p.then(
     function(obj) {
       res.json(200, obj);

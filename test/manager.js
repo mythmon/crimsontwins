@@ -2,8 +2,11 @@ require('./setup');
 
 var _ = require('underscore');
 var assert = require('assert');
+var sinon = require('sinon');
+
 var manager = require('../app/manager');
 var mockConfig = require('./mocks/config');
+
 
 describe('ScreenManager', function() {
 
@@ -52,7 +55,7 @@ describe('ScreenManager', function() {
     });
 
     it('should emit a event', function(done) {
-      screenMan.on('screenAdded', function(screen) {
+      screenMan.once('screenAdded', function(screen) {
         assert.equal('screen3', screen.name);
         done();
       });
@@ -75,7 +78,7 @@ describe('ScreenManager', function() {
     });
 
     it('should emit an event', function(done) {
-      screenMan.on('screenRemoved', function(screen) {
+      screenMan.once('screenRemoved', function(screen) {
         assert.equal('screen2', screen.name);
         done();
       });
@@ -121,11 +124,52 @@ describe('ScreenManager', function() {
 
     it('should emits a event', function(done) {
       var url = 'http://example.com/cat.gif';
-      screenMan.on('screenChanged', function(screen) {
+      screenMan.once('screenChanged', function(screen) {
         assert.equal(url, screen.content.url);
         done();
       });
       screenMan.sendUrl(url);
+    });
+  });
+
+  describe('#cycleScreen', function() {
+    beforeEach(function(done) {
+      screenMan.contentManager.load().then(function() {
+        done();
+      });
+    });
+
+    it('should change the right screen', function() {
+      var screen = screenMan.screens[0];
+      var before = screen.content.url;
+      screenMan.cycleScreen(screen.name);
+      var after = screen.content.url;
+
+      assert.notEqual(before, after);
+    });
+  });
+
+  describe('#makeTimeout', function() {
+    var clock;
+
+    beforeEach(function(done) {
+      screenMan.contentManager.load().then(function() {
+        done();
+      });
+      clock = sinon.useFakeTimers('setTimeout', 'clearTimeout');
+    });
+
+    afterEach(function() {
+      clock.restore();
+    });
+
+    it('should cause a screen to change at the right time', function() {
+      var screen = screenMan.screens[0];
+      var before = screen.content.url;
+      screenMan.makeTimeout(screen.name, 100);
+      assert.equal(before, screen.content.url);
+      clock.tick(101);
+      assert.notEqual(before, screen.content.url);
     });
   });
 });
@@ -264,7 +308,7 @@ describe('ContentManager', function() {
   describe('#load', function() {
     it('emits and event after loading', function(done) {
       var cm = new manager.ContentManager();
-      cm.on('loaded', function() {
+      cm.once('loaded', function() {
         done();
       });
       cm.load();

@@ -88,13 +88,33 @@ ScreenManager.prototype.sendUrl = function(url) {
 
 ScreenManager.prototype.onContentLoad = function(first_argument) {
   var self = this;
+  var skew = config.resetTime;
+  var skewIncr = config.resetTime / this.screens.length;
+
   _.each(this.screens, function(screen) {
     if (screen.waiting) {
       screen.waiting = false;
       screen.content = self.contentManager.next();
       self.emit('screenChanged', screen);
+
+      self.makeTimeout(screen.name, skew);
+      skew += skewIncr;
     }
   });
+};
+
+ScreenManager.prototype.cycleScreen = function(name) {
+  var screen = this.find(name);
+  screen.content = this.contentManager.next();
+  this.emit('screenChanged', screen);
+  this.makeTimeout(screen.name);
+};
+
+ScreenManager.prototype.makeTimeout = function(name, time) {
+  if (time === undefined) {
+    time = config.resetTime;
+  }
+  setTimeout(this.cycleScreen.bind(this, name), time);
 };
 /* end ScreenManager */
 
@@ -168,6 +188,16 @@ ContentManager.prototype.contentForUrl = function(url) {
   var self = this;
 
   var urlParts = uri.parse(url);
+
+  if (urlParts.errors.length) {
+    p.reject({
+      error: 400,
+      message: "Couldn't parse a URL from that ({0})"
+               .format(urlParts.errors.join(', '))
+    });
+    return p;
+  }
+
   var proto = urlParts.scheme === 'https' ? https : http;
   var port = urlParts.port || urlParts.scheme === 'https' ? 443 : 80;
   var path = urlParts.path;
@@ -231,7 +261,11 @@ ContentManager.prototype.contentForUrl = function(url) {
   });
 
   req.on('error', function(err) {
-    console.warning('Problem during load: ' + err);
+    console.log('Problem during load: ' + err);
+    p.reject({
+      error: 500,
+      message: err
+    });
   });
 
   req.end();
