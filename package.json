@@ -27,5 +27,8 @@
     },
     "bin": {
         "crimsontwins": "./crimsontwins.js"
+    },
+    "scripts": {
+        "test": "mocha"
     }
 }
