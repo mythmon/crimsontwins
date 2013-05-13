@@ -1,4 +1,5 @@
 var assert = require('assert');
+var promise = require('node-promise');
 var supertest = require('supertest');
 
 require('./setup');
@@ -81,26 +82,32 @@ describe('api', function() {
 
   describe('reset', function() {
     it('reset all screens to a default url', function(done) {
-      var i, screen;
+      var i, screen, p, promises = [];
+
       for (i = 0; i < web.screenManager.screens.length; i++) {
-        web.screenManager.sendUrl('http://example.com/oh_no.gif');
+        p = web.screenManager.sendUrl('http://example.com/oh_no.gif');
+        promises.push(p);
       }
 
-      supertest(web.app)
-        .post('/api/reset')
-        .expect(201)
-        .end(function(err, res) {
-          if (err) {
-            done(err);
-          }
-          var i, url, index;
-          for (i = 0; i < web.screenManager.screens.length; i++) {
-            url = web.screenManager.screens[i].content.url;
-            index = mockConfig.resetUrls.indexOf(url);
-            assert.notEqual(index, -1);
-          }
-          done();
-        });
+      promise.all(promises).then(function() {
+
+        supertest(web.app)
+          .post('/api/reset')
+          .expect(201)
+          .end(function(err, res) {
+            if (err) {
+              done(err);
+            }
+            var i, url, index;
+
+            for (i = 0; i < web.screenManager.screens.length; i++) {
+              url = web.screenManager.screens[i].content.url;
+              index = mockConfig.resetUrls.indexOf(url);
+              assert.notEqual(index, -1);
+            }
+            done();
+          });
+      });
     });
   });
 

@@ -64,7 +64,7 @@ describe('utils', function() {
 
       utils.eventRelay(source, dest, 'foo');
 
-      dest.on('foo', function() {
+      dest.once('foo', function() {
         done();
       });
 
