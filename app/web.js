@@ -24,7 +24,7 @@ app.post('/api/reset', function(req, res) {
   screenManager.reset(screenName);
 
   res.status(201);
-  res.end('');
+  res.end();
 });
 
 app.post('/api/sendurl', function(req, res) {

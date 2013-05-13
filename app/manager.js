@@ -127,6 +127,26 @@ ScreenManager.prototype.makeTimeout = function(name, time) {
   }
   this.timeouts[name] = setTimeout(this.cycleScreen.bind(this, name), time);
 };
+
+ScreenManager.prototype.reset = function(screenName) {
+  var screen, screens, self = this;
+
+  if (screenName) {
+    screen = this.find(screenName);
+    if (screen === undefined) {
+      // welp, we tried;
+      return;
+    }
+    screens = [screen];
+  } else {
+    screens = this.screens;
+  }
+
+  _.each(screens, function(s) {
+    s.content = self.contentManager.next();
+    self.emit('screenChanged', s);
+  });
+};
 /* end ScreenManager */
 
 

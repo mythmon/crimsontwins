@@ -2,6 +2,7 @@ require('./setup');
 
 var _ = require('underscore');
 var assert = require('assert');
+var promise = require('node-promise');
 var sinon = require('sinon');
 
 var manager = require('../app/manager');
@@ -190,6 +191,36 @@ describe('ScreenManager', function() {
       assert.equal(screen.content.url, before);
       clock.tick(60);
       assert.notEqual(screen.content.url, before);
+    });
+  });
+
+  describe('#reset', function() {
+    beforeEach(function(done) {
+      screenMan.contentManager.load().then(function() {
+        done();
+      });
+    });
+
+    it('should set all screens to default urls', function(done) {
+      var i, p, promises = [];
+
+      for (i = 0; i < screenMan.screens.length; i++) {
+        p = screenMan.sendUrl('http://example.com/omg.gif');
+        promises.push(p);
+      }
+
+      promise.all(p).then(function() {
+        var index, url;
+        screenMan.reset();
+
+        for (var i = 0; i < screenMan.screens.length; i++) {
+          url = screenMan.screens[i].content.url;
+          index = mockConfig.resetUrls.indexOf(url);
+          assert.notEqual(index, -1);
+        }
+
+        done();
+      });
     });
   });
 });

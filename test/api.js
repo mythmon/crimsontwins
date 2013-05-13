@@ -3,8 +3,9 @@ var supertest = require('supertest');
 
 require('./setup');
 
-var web = require('../app/web');
 var manager = require('../app/manager');
+var mockConfig = require('./mocks/config');
+var web = require('../app/web');
 
 describe('api', function() {
 
@@ -74,6 +75,31 @@ describe('api', function() {
           if (err) {
             done(err);
           }
+        });
+    });
+  });
+
+  describe('reset', function() {
+    it('reset all screens to a default url', function(done) {
+      var i, screen;
+      for (i = 0; i < web.screenManager.screens.length; i++) {
+        web.screenManager.sendUrl('http://example.com/oh_no.gif');
+      }
+
+      supertest(web.app)
+        .post('/api/reset')
+        .expect(201)
+        .end(function(err, res) {
+          if (err) {
+            done(err);
+          }
+          var i, url, index;
+          for (i = 0; i < web.screenManager.screens.length; i++) {
+            url = web.screenManager.screens[i].content.url;
+            index = mockConfig.resetUrls.indexOf(url);
+            assert.notEqual(index, -1);
+          }
+          done();
         });
     });
   });
