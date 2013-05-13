@@ -43,8 +43,10 @@ var mockHttp = {
 
     return {
       on: function(){},
-      end: function(){}
-    }
+      end: function(){},
+      setHeader: function(){},
+      getHeader: function(){}
+    };
   }
 };
 

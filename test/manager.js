@@ -10,7 +10,6 @@ var mockConfig = require('./mocks/config');
 
 describe('ScreenManager', function() {
 
-  // Requires must come here, to allow mocks to take affect.
   var screenMan;
 
   beforeEach(function() {
@@ -130,6 +129,15 @@ describe('ScreenManager', function() {
       });
       screenMan.sendUrl(url);
     });
+
+    it('should deal with screenNames', function(done) {
+      var url = 'http://example.com/cat.gif';
+      screenMan.once('screenChanged', function(screen) {
+        assert.equal('screen2', screen.name);
+        done();
+      });
+      screenMan.sendUrl(url, 'screen2');
+    });
   });
 
   describe('#cycleScreen', function() {
@@ -170,6 +178,18 @@ describe('ScreenManager', function() {
       assert.equal(before, screen.content.url);
       clock.tick(101);
       assert.notEqual(before, screen.content.url);
+    });
+
+    it('should cancel previous timeouts', function() {
+      var screen = screenMan.screens[0];
+      var before = screen.content.url;
+      screenMan.makeTimeout(screen.name, 100);
+      clock.tick(60);
+      screenMan.makeTimeout(screen.name, 100);
+      clock.tick(60);
+      assert.equal(screen.content.url, before);
+      clock.tick(60);
+      assert.notEqual(screen.content.url, before);
     });
   });
 });

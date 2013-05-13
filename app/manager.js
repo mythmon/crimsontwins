@@ -20,6 +20,7 @@ function ScreenManager() {
     return new Screen(name);
   });
   this.index = 0;
+  this.timeouts = {};
 
   events.EventEmitter.call(this);
 }
@@ -67,13 +68,19 @@ ScreenManager.prototype.next = function() {
   return screen;
 };
 
-ScreenManager.prototype.sendUrl = function(url) {
+ScreenManager.prototype.sendUrl = function(url, screenName) {
   var p = new promise.Promise();
   var self = this;
 
   this.contentManager.contentForUrl(url).then(
     function success(content) {
-      var screen = self.next();
+      var screen;
+      if (screenName) {
+        screen = self.find(screenName);
+      }
+      if (screen === undefined) {
+        screen = self.next();
+      }
       screen.content = content;
       p.resolve(content);
       self.emit('screenChanged', screen);
@@ -111,10 +118,14 @@ ScreenManager.prototype.cycleScreen = function(name) {
 };
 
 ScreenManager.prototype.makeTimeout = function(name, time) {
+  var oldTimeout = this.timeouts[name];
+  if (oldTimeout) {
+    clearTimeout(oldTimeout);
+  }
   if (time === undefined) {
     time = config.resetTime;
   }
-  setTimeout(this.cycleScreen.bind(this, name), time);
+  this.timeouts[name] = setTimeout(this.cycleScreen.bind(this, name), time);
 };
 /* end ScreenManager */
 

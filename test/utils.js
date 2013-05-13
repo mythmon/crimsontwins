@@ -51,6 +51,10 @@ describe('utils', function() {
       });
       assert.equal(0, a);
     });
+
+    it('should not error if callback is not a function', function() {
+      utils.async(undefined);
+    });
   });
 
   describe('eventRelay', function() {
