@@ -215,10 +215,22 @@ ContentManager.prototype.setUrls = function(urls) {
 };
 
 ContentManager.prototype.contentForUrl = function(url) {
-  var p = new promise.Promise();
+  var i, p = new promise.Promise();
   var self = this;
+  var modified;
+  var urlParts, proto, port, path;
+  var options, req;
 
-  var urlParts = uri.parse(url);
+  for (i = 0; i < modifiers.all.length; i++) {
+    modified = modifiers.all[i]({url: url});
+
+    if (modified !== undefined) {
+      modified.then(p.resolve.bind(p), p.reject.bind(p));
+      return p;
+    }
+  }
+
+  urlParts = uri.parse(url);
 
   if (urlParts.errors.length) {
     p.reject({
@@ -229,21 +241,21 @@ ContentManager.prototype.contentForUrl = function(url) {
     return p;
   }
 
-  var proto = urlParts.scheme === 'https' ? https : http;
-  var port = urlParts.port || urlParts.scheme === 'https' ? 443 : 80;
-  var path = urlParts.path;
+  proto = urlParts.scheme === 'https' ? https : http;
+  port = urlParts.port || urlParts.scheme === 'https' ? 443 : 80;
+  path = urlParts.path;
   if (urlParts.query) {
     path += '?' + urlParts.query;
   }
 
-  var options = {
+  options = {
     method: 'HEAD',
     host: urlParts.host,
     port: port,
     path: path
   };
 
-  var req = proto.request(options, function success(res) {
+  req = proto.request(options, function success(res) {
     var contentType, headers = {}, xframe;
     var content = {
       url: url,

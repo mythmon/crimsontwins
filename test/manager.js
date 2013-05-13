@@ -338,6 +338,14 @@ describe('ContentManager', function() {
       );
     });
 
+    it('should use modifiers', function(done) {
+      var url = 'http://imgur.com/DYO6X';
+      cm.contentForUrl(url).then(function(content) {
+        assert.equal(content.url, 'http://i.imgur.com/DYO6X.png');
+        done();
+      });
+    });
+
   });
 
   describe('#setUrls', function() {
