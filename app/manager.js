@@ -248,7 +248,7 @@ ContentManager.prototype.contentForUrl = function(url) {
   }
 
   proto = urlParts.scheme === 'https' ? https : http;
-  port = urlParts.port || urlParts.scheme === 'https' ? 443 : 80;
+  port = urlParts.port || (urlParts.scheme === 'https' ? 443 : 80);
   path = urlParts.path;
   if (urlParts.query) {
     path += '?' + urlParts.query;

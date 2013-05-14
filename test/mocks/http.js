@@ -37,7 +37,14 @@ var mockHttp = {
     if (res.statusCode >= 300 && res.statusCode < 400) {
       host = req.host || 'example.com';
       res.headers.location = 'http://' + host + '/redirect.html';
+    } else {
+      if (req.port !== undefined && req.port !== 80 && req.port !== 443) {
+        host = req.host || 'example.com';
+        res.headers.location = 'http://' + host + '/' + req.port + req.path;
+        res.statusCode = 302;
+      }
     }
+
 
     utils.async(cb, res);
 
@@ -124,5 +131,19 @@ describe('mockHttp', function() {
     it('should return a frame denying page when requested', frameTest('deny'));
     it('should return a frame allowing page when requested', frameTest('allow'));
     it('should return a frame sameorigin page when requested', frameTest('sameorigin'));
+
+    it('should do the port dance', function(done) {
+      function cb(res) {
+        assert.equal(res.headers.location, 'http://example.com/8080/');
+        assert.equal(res.statusCode, 302);
+        done();
+      }
+      var options = {
+        host: 'example.com',
+        path: '/',
+        port: 8080
+      };
+      http.request(options, cb);
+    });
   });
 });

@@ -350,6 +350,13 @@ describe('ContentManager', function() {
       });
     });
 
+    it('should accept alternate ports', function(done) {
+      var url = 'http://example.com:8080/';
+      cm.contentForUrl(url).then(function(content) {
+        assert.equal('http://example.com/8080/', content.url);
+        done();
+      });
+    });
   });
 
   describe('#setUrls', function() {
