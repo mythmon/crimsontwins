@@ -95,7 +95,7 @@ ircClient.addListener('message', function(from, to, message) {
       });
 
       res.on('end', function() {
-        data = JSON.stringify(data);
+        data = JSON.parse(data);
         if (data.message) {
           ircClient.say(to, data.message);
         }

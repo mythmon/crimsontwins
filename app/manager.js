@@ -296,7 +296,7 @@ ContentManager.prototype.contentForUrl = function(url) {
     if (xframe === 'sameorigin' || xframe === 'deny') {
       p.reject({
         error: 403,
-        messages: "That site prevents framing. It won't work."
+        message: "That site prevents framing. It won't work."
       });
       return;
     }
