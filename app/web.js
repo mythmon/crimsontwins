@@ -1,48 +1,93 @@
 var express = require('express');
 var http = require('http');
+var socketio = require('socket.io');
+
 var config = require('./config');
 var manager = require('./manager');
+var utils = require('./utils');
 
-
+var screenManager = new manager.ScreenManager();
+var contentManager = screenManager.contentManager;
 var app = express();
 
 app.set('port', config.web.port);
 
+// === VIEWS ===
+app.get('/api/ping', function(req, res) {
+  res.status(200);
+  res.end('pong');
+});
 
 app.post('/api/reset', function(req, res) {
   var screenName = req.query.screen || undefined;
 
-  manager.reset(screenName);
+  screenManager.reset(screenName);
 
   res.status(201);
-  res.send('');
+  res.end();
 });
 
 app.post('/api/sendurl', function(req, res) {
   var p;
   var url = req.query.url;
-  var screenName = req.query.screen || undefined;
+  var screenName = req.query.screen;
 
-  if (url === undefined) {
+  if (!url) {
     res.json(400, {error: 'URL is required.'});
     return;
   }
 
-  p = manager.setUrl(url, screenName);
-  //p.then(res.json.bind(res, 200), res.json.bind(res, 500));
+  p = screenManager.sendUrl(url, screenName);
   p.then(
     function(obj) {
       res.json(200, obj);
     },
     function(obj) {
-      res.json(500, obj);
+      var status = obj.error || 500;
+      res.json(status, obj);
     }
   );
 });
 
-
 app.use('/', express.static(__dirname + '/../static'));
 
-exports.server = http.createServer(app).listen(app.get('port'), function() {
-  console.log('Express server listening on port ' + app.get('port'));
-});
+
+// === Socket.IO ===
+
+function start() {
+  var server = http.createServer(app);
+  server.listen(app.get('port'), function() {
+    console.log('Listening on http://0.0.0.0:{0}'.format(app.get('port')));
+  });
+
+  var io = socketio.listen(server);
+  io.set('log level', 2);
+
+  io.sockets.on('connection', function(socket) {
+    socket.on('addScreen', screenManager.add.bind(screenManager));
+
+    socket.on('removeScreen', screenManager.remove.bind(screenManager));
+
+    socket.on('setContentSetUrls', contentManager.setUrls.bind(contentManager));
+
+    socket.on('getScreens', function(args, cb) {
+      cb(screenManager.all());
+    });
+
+    socket.on('getContentSet', function(args, cb) {
+      cb(contentManager.all());
+    });
+  });
+
+  utils.eventRelay(screenManager, io.sockets, 'screenChanged');
+  utils.eventRelay(screenManager, io.sockets, 'screenAdded');
+  utils.eventRelay(screenManager, io.sockets, 'screenRemoved');
+
+  contentManager.load();
+}
+
+exports.app = app;
+exports.start = start;
+exports.screenManager = screenManager;
+exports.contentManager = contentManager;
+

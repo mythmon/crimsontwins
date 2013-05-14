@@ -1,6 +1,9 @@
 var _ = require('underscore');
 
+var utils = require('./utils');
+
 exports.async = function async(func, args) {
+  if (typeof func !== 'function') return;
   args = Array.prototype.slice.call(arguments, 1);
   setTimeout(function() {
     func.apply(this, args);
@@ -49,7 +52,17 @@ exports.dottedGet = function(obj, selector) {
   return obj;
 };
 
-var _nextId = 0;
-exports.getId = function() {
-  return _nextId++;
+(function() {
+  var _nextId = 0;
+  exports.getId = function() {
+    return _nextId++;
+  };
+})();
+
+exports.eventRelay = function(from, to, name) {
+  from.on(name, function() {
+    var args = Array.prototype.slice.call(arguments);
+    args = [name].concat(args);
+    to.emit.apply(to, args);
+  });
 };

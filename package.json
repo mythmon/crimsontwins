@@ -16,13 +16,20 @@
         "socket.io": "0.9.x",
         "express": "3.x",
         "uri-js": "1.4.x",
-        "node-promise": "0.5.x"
+        "node-promise": "0.5.x",
+        "mocha": "1.9.x",
+        "mockery": "1.4.0",
+        "supertest": "0.6.x",
+        "sinon": "1.7.x"
     },
     "engines": {
-        "node": ">=0.8.15",
+        "node": ">=0.8.0",
         "npm": ">=1.1.32"
     },
     "bin": {
         "crimsontwins": "./crimsontwins.js"
+    },
+    "scripts": {
+        "test": "mocha"
     }
 }

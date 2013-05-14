@@ -1,3 +1,2 @@
-require('./app/config');
-require('./app/manager');
-require('./app/chat');
+var web = require('./app/web');
+web.start();
