@@ -64,11 +64,11 @@ function start() {
   io.set('log level', 2);
 
   io.sockets.on('connection', function(socket) {
-    socket.on('addScreen', screenManager.add);
+    socket.on('addScreen', screenManager.add.bind(screenManager));
 
-    socket.on('removeScreen', screenManager.remove);
+    socket.on('removeScreen', screenManager.remove.bind(screenManager));
 
-    socket.on('setContentSetUrls', contentManager.setUrls);
+    socket.on('setContentSetUrls', contentManager.setUrls.bind(contentManager));
 
     socket.on('getScreens', function(args, cb) {
       cb(screenManager.all());

@@ -41,6 +41,8 @@ ScreenManager.prototype.add = function(name) {
   screen.content = this.contentManager.next();
   this.screens.push(screen);
   this.emit('screenAdded', screen);
+  config.screens = _.map(this.screens, function(s) { return s.name; });
+  config.save();
 };
 
 ScreenManager.prototype.remove = function(name) {
@@ -48,6 +50,8 @@ ScreenManager.prototype.remove = function(name) {
   if (screen) {
     this.screens = _.without(this.screens, screen);
     this.emit('screenRemoved', screen);
+    config.screens = _.map(this.screens, function(s) { return s.name; });
+    config.save();
   } else {
     return "Error: screen not found.";
   }
@@ -211,6 +215,8 @@ ContentManager.prototype.next = function() {
 
 ContentManager.prototype.setUrls = function(urls) {
   this.contentUrls = urls;
+  config.resetUrls = urls;
+  config.save();
   return this.load();
 };
 

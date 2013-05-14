@@ -103,7 +103,7 @@ function makeSelectors() {
 }
 
 var screenPreviewTemplate =
-  '<li class="preview">' +
+  '<li class="preview screen">' +
     '<h1>{name}</h1>' +
     '<div class="content"/>' +
   '</li>';
@@ -114,7 +114,7 @@ function makeScreenPreview(screen, events) {
   }
   var $elem = $(screenPreviewTemplate.format(screen))
     .data('screen', screen)
-    .attr('name', 'screen-' + screen.id);
+    .attr('name', screen.name);
   if (events) {
     $elem.find('.content').on('click', function(ev) {
       ev.preventDefault();
@@ -125,7 +125,7 @@ function makeScreenPreview(screen, events) {
       $('<button class="close">X</button>')
         .on('click', function() {
           console.log('removing screen');
-          socket.emit('removeScreen', screen.id);
+          socket.emit('removeScreen', screen.name);
         }));
   }
   $elem.children('.content').html(elementFor(screen.content));
@@ -133,7 +133,7 @@ function makeScreenPreview(screen, events) {
 }
 
 var selectedScreenTemplate =
-  '<div class="overlay" name="screen-{id}">' +
+  '<div class="overlay screen" name="{name}">' +
     '<div class="content"></div>' +
     '<div class="meta">' +
       '<span class="name">{name}</span>' +
@@ -212,7 +212,7 @@ window.onpopstate = function(ev) {
   if (!ev.state) {
     $elem = [];
   } else {
-    $elem = $('.preview[name={name}]'.format(ev.state.screen));
+    $elem = $('.preview[name="{name}"]'.format(ev.state.screen));
   }
 
   if ($elem.length > 0) {
@@ -237,7 +237,7 @@ socket.on('screenAdded', function(screen) {
 
 socket.on('screenChanged', function(screen) {
   console.log("screenChanged " + JSON.stringify(screen));
-  $preview = $('[name=screen-{id}]'.format(screen));
+  $preview = $('.screen[name="{name}"]'.format(screen));
   $preview.find('.content').html(elementFor(screen.content));
   $preview.find('.meta .url').text(screen.content.url);
   $preview.data('screen', screen);
@@ -246,10 +246,10 @@ socket.on('screenChanged', function(screen) {
 socket.on('screenRemoved', function(screen) {
   console.log('screenRemoved ' + JSON.stringify(screen));
   var makeIt = false;
-  if ($('wrap[name=screen-{id}]'.length > 0)) {
+  if ($('wrap.screen[name="{name}"]'.length > 0)) {
     makeIt = true;
   }
-  $('[name=screen-{id}]'.format(screen)).remove();
+  $('.screen[name="{name}"]'.format(screen)).remove();
   if (makeIt) {
     makeSelectors();
   }
