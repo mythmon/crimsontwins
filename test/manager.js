@@ -17,6 +17,10 @@ describe('ScreenManager', function() {
     screenMan = new manager.ScreenManager();
   });
 
+  afterEach(function() {
+    mockConfig.reset();
+  });
+
   describe('#all', function() {
     it('should list all screens in the config file', function() {
       var i;

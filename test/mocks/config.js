@@ -26,6 +26,10 @@ testConfig.save = function(cb) {
   setTimeout(cb, 0);
 };
 
+testConfig.reset = function() {
+  _.extend(exports, originalConfig, testConfig);
+};
+
 _.extend(exports, originalConfig, testConfig);
 
 
