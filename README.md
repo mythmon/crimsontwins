@@ -1,6 +1,8 @@
 CrimsonTwins
 ============
 
+[![Build Status](https://travis-ci.org/mythmon/crimsontwins.png?branch=master)](https://travis-ci.org/mythmon/crimsontwins)
+
 Mozilla WebDev recently got two big wall mounted screens for our nefarious
 uses. We decided they should show some useful information, and be a source of
 irc-based mayem. This is a Node.js app that starts an IRC bot and a HTTP
