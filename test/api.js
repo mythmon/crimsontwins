@@ -93,7 +93,7 @@ describe('api', function() {
 
         supertest(web.app)
           .post('/api/reset')
-          .expect(201)
+          .expect(204)
           .end(function(err, res) {
             if (err) {
               done(err);
