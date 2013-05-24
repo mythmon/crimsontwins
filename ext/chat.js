@@ -95,9 +95,14 @@ ircClient.addListener('message', function(from, to, message) {
       });
 
       res.on('end', function() {
-        data = JSON.parse(data);
-        if (data.message) {
-          ircClient.say(to, data.message);
+        try {
+          data = JSON.parse(data);
+          if (data.message) {
+            ircClient.say(to, data.message);
+          }
+        } catch(e) {
+          ircClient.say('Something went wrong (' + e + ')');
+          console.log('Error sending url: ' + data);
         }
       });
     });
