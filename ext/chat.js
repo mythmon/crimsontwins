@@ -101,7 +101,7 @@ ircClient.addListener('message', function(from, to, message) {
         try {
           data = JSON.parse(data);
           if (data.message) {
-            ircClient.say(to, data.message);
+            ircClient.say(to, JSON.stringify(data.message));
           }
         } catch(e) {
           ircClient.say('Something went wrong (' + e + ')');
