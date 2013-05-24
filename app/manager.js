@@ -87,6 +87,7 @@ ScreenManager.prototype.sendUrl = function(url, screenName) {
       }
       screen.content = content;
       p.resolve(content);
+      self.makeTimeout(screen.name);
       self.emit('screenChanged', screen);
     },
     function fail(error) {
@@ -108,6 +109,7 @@ ScreenManager.prototype.onContentLoad = function(first_argument) {
       screen.content = self.contentManager.next();
       self.emit('screenChanged', screen);
 
+      // ensure all screens don't change at once
       self.makeTimeout(screen.name, skew);
       skew += skewIncr;
     }
@@ -123,13 +125,17 @@ ScreenManager.prototype.cycleScreen = function(name) {
 
 ScreenManager.prototype.makeTimeout = function(name, time) {
   var oldTimeout = this.timeouts[name];
+  if (arguments.length < 2) {
+    time = config.resetTime;
+  }
+
   if (oldTimeout) {
     clearTimeout(oldTimeout);
   }
-  if (time === undefined) {
-    time = config.resetTime;
+
+  if (time > -1) {
+    this.timeouts[name] = setTimeout(this.cycleScreen.bind(this, name), time);
   }
-  this.timeouts[name] = setTimeout(this.cycleScreen.bind(this, name), time);
 };
 
 ScreenManager.prototype.reset = function(screenName) {

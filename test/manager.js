@@ -196,6 +196,16 @@ describe('ScreenManager', function() {
       clock.tick(60);
       assert.notEqual(screen.content.url, before);
     });
+
+    it('should not timeout when passed a negative time', function() {
+      var screen = screenMan.screens[0];
+      var before = screen.content.url;
+      screenMan.makeTimeout(screen.name, -1);
+      clock.tick(mockConfig.resetTime);
+      assert.equal(screen.content.url, before);
+      clock.tick(mockConfig.resetTime + 1); // induction step
+      assert.equal(screen.content.url, before);
+    })
   });
 
   describe('#reset', function() {
