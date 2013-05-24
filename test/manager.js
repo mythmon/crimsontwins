@@ -1,6 +1,6 @@
 require('./setup');
 
-var _ = require('underscore');
+var _ = require('lodash');
 var assert = require('assert');
 var promise = require('node-promise');
 var sinon = require('sinon');

@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 
@@ -24,11 +24,14 @@ function configFromFile(path) {
 
   if (existsSync(path)) {
     try {
-      json = fs.readFileSync(configPath);
+      json = fs.readFileSync(path);
       config = JSON.parse(json);
     } catch(e) {
+      console.log('Error: ', e);
       // Well ok.
     }
+  } else {
+    console.log('path ' + path + ' not found');
   }
 
   return config;
@@ -60,13 +63,17 @@ function configFromEnv() {
       }
     }
   }
+
+  return config;
 }
 
-configStack.push(configFromFile('./config'));
-configStack.push(configFromFile(process.env.STACKATO_FILESYSTEM + '/config'));
+configStack.push(configFromFile('./config.json'));
+if (process.env.STACKATO_FILESYSTEM) {
+  configStack.push(configFromFile(process.env.STACKATO_FILESYSTEM + '/config.json'));
+}
 configStack.push(configFromEnv());
 
-config = _.extend.apply(null, configStack);
+config = _.merge.apply(null, configStack);
 
 config.save = function(cb) {
   var confStr = JSON.stringify(config, null, 4);
