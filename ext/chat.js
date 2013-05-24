@@ -37,6 +37,9 @@ function api(method, url, query, cb) {
 
   opts = urllib.parse(config.apiUrl + '/api' + url);
   opts.method = method.toUpperCase();
+  opts.headers = {
+    'Content-Length': 0,
+  };
 
   res = http.request(opts, cb);
   res.end();
