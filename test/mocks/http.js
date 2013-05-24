@@ -1,5 +1,9 @@
-var _ = require('underscore');
 var assert = require('assert');
+var events = require('events');
+var urlParse = require('url').parse;
+
+var _ = require('underscore');
+
 var utils = require('../../app/utils');
 
 var realHttp = require('http');
@@ -8,13 +12,19 @@ var realHttp = require('http');
 var mockHttp = {
   request: function(req, cb) {
     var match, ext, host;
-    var res = {
+    var res = new events.EventEmitter();
+
+    if (typeof req === 'string') {
+      req = urlParse(req);
+    }
+
+    _.extend(res, {
       statusCode: 200,
       headers: {
         'content-length': 0,
         'content-type': 'text/html'
       }
-    };
+    });
 
     if (req.path) {
       ext = req.path.split('.').slice(-1)[0];
@@ -45,15 +55,20 @@ var mockHttp = {
       }
     }
 
-
     utils.async(cb, res);
 
-    return {
-      on: function(){},
-      end: function(){},
-      setHeader: function(){},
-      getHeader: function(){}
-    };
+    if (/xkcd.com/.exec(req.host) && /614\/+info.0.json/.exec(req.path)) {
+      utils.async(res.emit.bind(res), 'data', '{"img": "http:\/\/imgs.xkcd.com\/comics\/woodpecker.png"}');
+    }
+
+    utils.async(res.emit.bind(res), 'end');
+
+    var ev = new events.EventEmitter();
+    ev.setHeader = function(){};
+    ev.getHeader = function(){};
+    ev.end = function(){};
+
+    return ev;
   }
 };
 

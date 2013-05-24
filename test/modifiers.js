@@ -52,4 +52,16 @@ describe('modifiers', function() {
       });
     });
   });
+
+  describe('unpackXkcd', function() {
+    it('should get XKCD image urls', function(done) {
+      var url = 'http://xkcd.com/614/';
+      var p = modifiers.unpackXkcd({url: url});
+      p.then(function(content) {
+        assert.equal(content.url, 'http://imgs.xkcd.com/comics/woodpecker.png');
+        assert.equal(content.type, 'image');
+        done();
+      });
+    });
+  });
 });
