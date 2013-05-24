@@ -1,6 +1,8 @@
-var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
+
+var _ = require('lodash');
+var promise = require('node-promise');
 
 
 // Configuration
@@ -75,19 +77,23 @@ configStack.push(configFromEnv());
 
 config = _.merge.apply(null, configStack);
 
-config.save = function(cb) {
+config.save = function() {
+  var p = new promise.Promise();
+
   var confStr = JSON.stringify(config, null, 4);
   var count = 1;
   function counter() {
     count--;
     if (count === 0) {
-      cb.apply(this, arguments);
+      p.resolve();
     }
   }
 
   if (process.env.STACKATO_FILESYSTEM) {
-    count++
+    count++;
     fs.writeFile(process.env.STACKATO_FILESYSTEM + '/config.json', confStr, counter);
   }
   fs.writeFile('./config.json', confStr, counter);
+
+  return p;
 };
