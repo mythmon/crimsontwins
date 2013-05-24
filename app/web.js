@@ -1,5 +1,8 @@
-var express = require('express');
+var path = require('path');
 var http = require('http');
+var fs = require('fs');
+
+var express = require('express');
 var socketio = require('socket.io');
 
 var config = require('./config');
@@ -23,7 +26,7 @@ app.post('/api/reset', function(req, res) {
 
   screenManager.reset(screenName);
 
-  res.status(201);
+  res.status(204);
   res.end();
 });
 
@@ -49,12 +52,32 @@ app.post('/api/sendurl', function(req, res) {
   );
 });
 
-app.use('/', express.static(__dirname + '/../static'));
+app.get('/api/config', function(req, res) {
+  res.end(JSON.stringify(config, null, true));
+});
+
+app.get('/api/staticpath', function(req, res) {
+  res.end(path.normalize(__dirname + '/../static'));
+});
+
+app.get('/api/env', function(req, res) {
+  res.end(JSON.stringify(process.env));
+});
+
+app.get('/', function(req, res) {
+  console.log('serving the index');
+  var content = fs.readFileSync('/app/app/static/index.html');
+  console.log(content);
+  res.end(content);
+});
+
+app.use(express.static(path.normalize(__dirname + '/../static')));
 
 
 // === Socket.IO ===
 
 function start() {
+  var key;
   var server = http.createServer(app);
   server.listen(app.get('port'), function() {
     console.log('Listening on http://0.0.0.0:{0}'.format(app.get('port')));
@@ -62,6 +85,9 @@ function start() {
 
   var io = socketio.listen(server);
   io.set('log level', 2);
+  for (key in config.io) {
+    io.set(key, config.io[key]);
+  }
 
   io.sockets.on('connection', function(socket) {
     socket.on('addScreen', screenManager.add.bind(screenManager));

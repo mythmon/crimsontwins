@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var assert = require('assert');
 var events = require('events');
 var urlParse = require('url').parse;

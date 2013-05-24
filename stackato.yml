@@ -1,0 +1,10 @@
+name: crimsontwins
+framework:
+    type: node
+    runtime: node08
+mem: 64M
+instances: 1
+processes:
+    web: node crimsontwins.js
+services:
+    config: filesystem
