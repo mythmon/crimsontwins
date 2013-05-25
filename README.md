@@ -62,3 +62,9 @@ The main file is `crimsontwins.js`. Run that like
 ```
 
 You should now have a running crimsontwins instance.
+
+
+Development
+===========
+
+Make a feature branch and hack away. When you're ready, open a pull request. Use `make test` to run tests locally.
