@@ -59,7 +59,7 @@ ScreenManager.prototype.remove = function(name) {
 
 ScreenManager.prototype.find = function(name) {
   for (var i = 0; i < this.screens.length; i++) {
-    if (this.screens[i].name === name) {
+    if (this.screens[i].name.toLowerCase() === name.toLowerCase()) {
       return this.screens[i];
     }
   }
@@ -82,7 +82,7 @@ ScreenManager.prototype.sendUrl = function(url, screenName) {
       if (screenName) {
         screen = self.find(screenName);
       }
-      if (screen === undefined) {
+      if (screen === undefined || screen === null) {
         screen = self.next();
       }
       screen.content = content;
