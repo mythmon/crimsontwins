@@ -88,16 +88,33 @@ describe('ScreenManager', function() {
       });
       screenMan.remove('screen2');
     });
+
+    it('can remove screens with globs', function() {
+      screenMan.add('junk1');
+      screenMan.add('junk2');
+      screenMan.remove('*1');
+      assert.deepEqual(_.pluck(screenMan.screens, 'name'), ['screen2', 'junk2']);
+    });
   });
 
   describe('#find', function() {
     it('should find screens by name', function() {
-      var screen = screenMan.find('screen1');
-      assert.notEqual(null, screen);
-      assert.equal('screen1', screen.name);
+      var screens = screenMan.find('screen1');
+      assert.equal(screens.length, 1);
+      assert.equal(screens[0].name, 'screen1');
     });
-    it('should return null for nonexistant screens', function() {
-      assert.equal(null, screenMan.find('nonexistant'));
+
+    it('should return an empty array for nonexistant screens', function() {
+      assert.deepEqual(screenMan.find('nonexistant'), []);
+    });
+
+    it('should find sceens by glob', function() {
+      screenMan.add('tv1');
+      screenMan.add('tv2');
+
+      assert.deepEqual(_.pluck(screenMan.find('tv*'), 'name'), ['tv1', 'tv2']);
+      assert.deepEqual(_.pluck(screenMan.find('*1'), 'name'), ['screen1', 'tv1']);
+      assert.equal(screenMan.find('*').length, 4);
     });
   });
 
@@ -118,6 +135,10 @@ describe('ScreenManager', function() {
   });
 
   describe('#sendUrl', function() {
+    afterEach(function() {
+      screenMan.removeAllListeners();
+    });
+
     it('updates a screen', function(done) {
       var url = 'http://example.com/cat.gif';
       screenMan.sendUrl(url).then(function() {
@@ -142,6 +163,24 @@ describe('ScreenManager', function() {
         done();
       });
       screenMan.sendUrl(url, 'screen2');
+    });
+
+    it('should glob screens', function(done) {
+      var url = 'http://example.com/lol.png';
+      expected = ['screen1', 'screen2', 'screen3'];
+      screenMan.add('screen3');
+      screenMan.add('foobar');
+
+      screenMan.on('screenChanged', function(screen) {
+        assert.notEqual(expected.indexOf(screen.name), -1)
+        assert.equal(screen.content.url, url);
+        expected = _.without(expected, screen.name);
+        if (expected.length === 0) {
+          done();
+        }
+      });
+
+      screenMan.sendUrl(url, 'screen*');
     });
   });
 
@@ -216,14 +255,9 @@ describe('ScreenManager', function() {
     });
 
     it('should set all screens to default urls', function(done) {
-      var i, p, promises = [];
+      var p = screenMan.sendUrl('http://example.com/omg.gif', '*');
 
-      for (i = 0; i < screenMan.screens.length; i++) {
-        p = screenMan.sendUrl('http://example.com/omg.gif');
-        promises.push(p);
-      }
-
-      promise.all(p).then(function() {
+      p.then(function() {
         var index, url;
         screenMan.reset();
 
@@ -236,6 +270,46 @@ describe('ScreenManager', function() {
         done();
       });
     });
+
+    it('should target a screen', function(done) {
+      var p, promises = [];
+      var okUrl = 'http://example.com/ok.gif';
+      var badUrl = 'http://example.com/omg.gif';
+      promises.push(screenMan.sendUrl(okUrl, 'screen1'));
+      promises.push(screenMan.sendUrl(badUrl, 'screen2'));
+
+      promise.all(promises).then(function() {
+        screenMan.reset('screen2');
+        assert.equal(screenMan.screens[0].content.url, okUrl);
+        assert.notEqual(screenMan.screens[1].content.url, badUrl);
+        done();
+      });
+    });
+
+    it('should target globs', function(done) {
+      var i, p;
+      var url = 'http://example.com/tv.gif';
+
+      screenMan.add('tv1');
+      screenMan.add('tv2');
+
+      p = screenMan.sendUrl(url, '*');
+
+      p.then(function() {
+        screenMan.reset('screen*');
+
+        _.each(screenMan.find('tv*'), function(screen) {
+          assert.equal(screen.content.url, url);
+        });
+        _.each(screenMan.find('screen*'), function(screen) {
+          assert.notEqual(screen.content.url, url);
+        });
+
+        done();
+      });
+    });
+
+
   });
 });
 
