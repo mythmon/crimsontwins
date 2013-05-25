@@ -3,7 +3,7 @@ var assert = require('assert');
 var events = require('events');
 var urlParse = require('url').parse;
 
-var _ = require('underscore');
+var _ = require('lodash');
 
 var utils = require('../../app/utils');
 
