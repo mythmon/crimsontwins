@@ -64,12 +64,13 @@ var mockHttp = {
 
     utils.async(res.emit.bind(res), 'end');
 
-    var ev = new events.EventEmitter();
-    ev.setHeader = function(){};
-    ev.getHeader = function(){};
-    ev.end = function(){};
+    var req = new events.EventEmitter();
+    req.setHeader = function(){};
+    req.getHeader = function(){};
+    req.end = function(){};
+    req.path = res.path || '';
 
-    return ev;
+    return req;
   }
 };
 
