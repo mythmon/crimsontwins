@@ -5,11 +5,12 @@ var https = require('https');
 
 
 (function() {
+  var noodle_re = /noodletalk.org/;
   exports.blacklistNoodle = function(opts) {
     var p;
     var components = uri.parse(opts.url);
 
-    if (components.host.indexOf('noodletalk.org') >= 0) {
+    if (opts.url.match(noodle_re)) {
       p = new promise.Promise();
       p.resolve({
         message:'NOPE',
