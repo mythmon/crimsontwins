@@ -17,6 +17,7 @@ function init() {
 
   makeSelectors();
   makeAdmin();
+  makeConnectionStatus();
 }
 
 // When all readyParts are reported as ready, call init().
@@ -207,6 +208,13 @@ function makeAdmin() {
   $('body').append($admin);
 }
 
+function makeConnectionStatus() {
+  $('<span />')
+    .text('No connection')
+    .attr('id', 'connection-status')
+    .appendTo('body');
+}
+
 window.onpopstate = function(ev) {
   var $elem;
   if (!ev.state) {
@@ -224,6 +232,16 @@ window.onpopstate = function(ev) {
 
 /* Socket.IO connections */
 socket = io.connect('/');
+
+socket.on('connect', function() {
+  console.log('connected');
+  $('#connection-status').hide();
+});
+
+socket.on('disconnect', function(screen) {
+  console.log('disconnected');
+  $('#connection-status').show();
+});
 
 socket.on('reset', function() {
   console.log('reset');
