@@ -64,13 +64,6 @@ app.get('/api/env', function(req, res) {
   res.end(JSON.stringify(process.env));
 });
 
-app.get('/', function(req, res) {
-  console.log('serving the index');
-  var content = fs.readFileSync('/app/app/static/index.html');
-  console.log(content);
-  res.end(content);
-});
-
 app.use(express.static(path.normalize(__dirname + '/../static')));
 
 

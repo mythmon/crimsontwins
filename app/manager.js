@@ -5,6 +5,7 @@ var https = require('https');
 
 var promise = require('node-promise');
 var uri = require('uri-js');
+var Minimatch = require('minimatch').Minimatch;
 
 var config = require('./config');
 var modifiers = require('./modifiers');
@@ -35,7 +36,9 @@ ScreenManager.prototype.all = function() {
 ScreenManager.prototype.add = function(name) {
   // duplicate names and empty names are both bad.
   if (!name) return "Error: name can't be empty.";
-  if (this.find(name)) return "Error: Duplicate name {0}".format(name);
+  if (this.find(name, 'noglob').length > 0) {
+    return "Error: Duplicate name {0}".format(name);
+  }
 
   var screen = new Screen(name);
   screen.content = this.contentManager.next();
@@ -46,10 +49,15 @@ ScreenManager.prototype.add = function(name) {
 };
 
 ScreenManager.prototype.remove = function(name) {
-  var screen = this.find(name);
-  if (screen) {
-    this.screens = _.without(this.screens, screen);
-    this.emit('screenRemoved', screen);
+  var screens = this.find(name);
+  var self = this;
+
+  if (screens.length > 0) {
+    _.each(screens, function(screen) {
+      self.screens = _.reject(self.screens, {name: screen.name});
+      self.emit('screenRemoved', screen);
+    });
+
     config.screens = _.map(this.screens, function(s) { return s.name; });
     config.save();
   } else {
@@ -57,13 +65,29 @@ ScreenManager.prototype.remove = function(name) {
   }
 };
 
-ScreenManager.prototype.find = function(name) {
+ScreenManager.prototype.find = function(name, noGlob) {
+  var mm, glob, screens = [];
+
+  if (name === undefined) {
+    return screens;
+  }
+
+  if (noGlob) {
+    glob = function(s) {
+      return s.toLowerCase() == name.toLowerCase();
+    };
+  } else {
+    mm = new Minimatch(name, {'nocase': true});
+    glob = mm.match.bind(mm);
+  }
+
   for (var i = 0; i < this.screens.length; i++) {
-    if (this.screens[i].name.toLowerCase() === name.toLowerCase()) {
-      return this.screens[i];
+    if (glob(this.screens[i].name)) {
+      screens.push(this.screens[i]);
     }
   }
-  return null;
+
+  return screens;
 };
 
 ScreenManager.prototype.next = function() {
@@ -78,17 +102,19 @@ ScreenManager.prototype.sendUrl = function(url, screenName) {
 
   this.contentManager.contentForUrl(url).then(
     function success(content) {
-      var screen;
-      if (screenName) {
-        screen = self.find(screenName);
+      var screens = self.find(screenName);
+
+      if (screens.length === 0) {
+        screens = [self.next()];
       }
-      if (screen === undefined || screen === null) {
-        screen = self.next();
-      }
-      screen.content = content;
+
+      _.each(screens, function(screen) {
+        screen.content = content;
+        self.makeTimeout(screen.name);
+        self.emit('screenChanged', screen);
+      });
+
       p.resolve(content);
-      self.makeTimeout(screen.name);
-      self.emit('screenChanged', screen);
     },
     function fail(error) {
       p.reject(error);
@@ -117,10 +143,12 @@ ScreenManager.prototype.onContentLoad = function(first_argument) {
 };
 
 ScreenManager.prototype.cycleScreen = function(name) {
-  var screen = this.find(name);
-  screen.content = this.contentManager.next();
-  this.emit('screenChanged', screen);
-  this.makeTimeout(screen.name);
+  var self = this;
+  _.each(this.find(name), function(screen) {
+    screen.content = self.contentManager.next();
+    self.emit('screenChanged', screen);
+    self.makeTimeout(screen.name);
+  });
 };
 
 ScreenManager.prototype.makeTimeout = function(name, time) {
@@ -139,15 +167,10 @@ ScreenManager.prototype.makeTimeout = function(name, time) {
 };
 
 ScreenManager.prototype.reset = function(screenName) {
-  var screen, screens, self = this;
+  var screens, self = this;
 
   if (screenName) {
-    screen = this.find(screenName);
-    if (screen === undefined) {
-      // welp, we tried;
-      return;
-    }
-    screens = [screen];
+    screens = this.find(screenName);
   } else {
     screens = this.screens;
   }
