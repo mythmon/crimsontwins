@@ -93,5 +93,5 @@ Here's an example:
 
 ```shell
 > CT_IRC_SERVER=irc.server.org CT_IRC_NICK=crimsontwins \
-  CT_IRC_CHANNELS=foo,bar CT_API_URL=myct.example.com node ext/chat.js
+  CT_IRC_CHANNELS=#foo,#bar CT_API_URL=http://myct.example.com node ext/chat.js
 ```
