@@ -10,6 +10,10 @@ mockery.registerMock('./config', mockConfig);
 mockery.registerMock('http', mockHttp);
 mockery.registerMock('https', mockHttp);
 
+afterEach(function() {
+  mockConfig.reset();
+});
+
 after(function() {
   mockery.deregisterAll();
   mockery.disable();

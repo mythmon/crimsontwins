@@ -12,6 +12,12 @@ var realHttp = require('http');
 
 var mockHttp = {
   request: function(req, cb) {
+    var p = parseInt(req.port, 10);
+    if (3456 <= p && p <= 3500) {
+      // this is the port supertest uses. We shouldn't mock supertest.
+      return realHttp.request.apply(this, arguments);
+    }
+
     var match, ext, host;
     var res = new events.EventEmitter();
 

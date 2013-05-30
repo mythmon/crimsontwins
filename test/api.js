@@ -10,10 +10,6 @@ var web = require('../app/web');
 
 describe('api', function() {
 
-  before(function() {
-    web.start();
-  });
-
   beforeEach(function() {
     web.screenManager.index = 0;
     web.contentManager.index = 0;
@@ -81,6 +77,10 @@ describe('api', function() {
   });
 
   describe('reset', function() {
+    before(function() {
+      web.contentManager.load();
+    });
+
     it('reset all screens to a default url', function(done) {
       var i, screen, p, promises = [];
 
