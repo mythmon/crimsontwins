@@ -10,10 +10,6 @@ var web = require('../app/web');
 
 describe('api', function() {
 
-  before(function() {
-    web.start();
-  });
-
   beforeEach(function() {
     web.screenManager.index = 0;
     web.contentManager.index = 0;
