@@ -77,6 +77,10 @@ describe('api', function() {
   });
 
   describe('reset', function() {
+    before(function() {
+      web.contentManager.load();
+    });
+
     it('reset all screens to a default url', function(done) {
       var i, screen, p, promises = [];
 
