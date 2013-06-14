@@ -1,9 +1,11 @@
-var path = require('path');
-var http = require('http');
 var fs = require('fs');
+var http = require('http');
+var path = require('path');
 
 var express = require('express');
+var nib = require('nib');
 var socketio = require('socket.io');
+var stylus = require('stylus');
 
 var config = require('./config');
 var manager = require('./manager');
@@ -15,7 +17,8 @@ var app = express();
 
 app.set('port', config.web.port);
 
-// === VIEWS ===
+// === Views ===
+
 app.get('/api/ping', function(req, res) {
   res.status(200);
   res.end('pong');
@@ -64,7 +67,23 @@ app.get('/api/env', function(req, res) {
   res.end(JSON.stringify(process.env));
 });
 
-app.use(express.static(path.normalize(__dirname + '/../static')));
+// === Static files ===
+
+var staticPath = path.normalize(__dirname + '/../static');
+
+// Stylus
+app.use(stylus.middleware({
+  src: staticPath,
+  compile: function(str, path) {
+    return stylus(str)
+      .set('filename', path)
+      .set('compress', true)
+      .use(nib);
+  }
+}));
+
+// Normal static files
+app.use(express.static(staticPath));
 
 
 // === Socket.IO ===

@@ -11,17 +11,19 @@
         "url": "git://github.com/mythmon/crimsontwins.git"
     },
     "dependencies": {
-        "irc": "0.3.x",
-        "lodash": "1.2.x",
-        "socket.io": "0.9.x",
-        "express": "3.x",
-        "uri-js": "1.4.x",
-        "node-promise": "0.5.x",
-        "mocha": "1.9.x",
+        "express": "3.2.5",
+        "lodash": "1.2.1",
+        "minimatch": "0.2.12",
+        "nib": "0.9.1",
+        "node-promise": "0.5.6",
+        "socket.io": "0.9.14",
+        "stylus": "0.32.1",
+        "uri-js": "1.4.2",
+
+        "mocha": "1.9.0",
         "mockery": "1.4.0",
-        "supertest": "0.6.x",
-        "sinon": "1.7.x",
-        "minimatch": "0.2.12"
+        "sinon": "1.7.2",
+        "supertest": "0.6.0"
     },
     "engines": {
         "node": ">=0.8.0",
