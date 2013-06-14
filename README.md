@@ -40,17 +40,18 @@ Configuration
 -------------
 
 You'll need to configure things. Copy `config.json-dist` to `config.json`, and
-edit it appropriately. Things you will probably want to change are:
+edit it appropriately. The options you can set in this file are:
 
-- `irc`
-    - `server` - The IRC server to connect to.
-    - `nick` - The name the bot should use.
-    - `channels` - An array of channels to join.
 - `resetUrls` - An array of urls for the default rotation.
+- `resetTime` - The time it takes to automatically cycle a screen.
+- `screens` - An array of screens to automatically create.
+- `web`
+  - `host` - The host to bind to.
+  - `port` - The port to bind to.
 
-> Warning! This file may be overwritten at run time. Things that can change are
-> currently limited to the resetUrls, which are editable from the web
-> interface. If this is a problem, be sure to make a backup of the config file.
+> Warning! This file may be overwritten at run time. Things that can
+> change are currently limited to the resetUrls and screens, which are
+> editable from the web interface.
 
 Run
 ===
