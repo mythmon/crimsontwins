@@ -4,5 +4,6 @@
     },
     "resetTime": 60000,
     "resetUrls": [],
-    "screens": ["screen1"]
+    "screens": ["screen1"],
+    "debug": false
 }

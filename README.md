@@ -48,6 +48,7 @@ edit it appropriately. The options you can set in this file are:
 - `web`
   - `host` - The host to bind to.
   - `port` - The port to bind to.
+- `config` - When true, sets features that will be useful in development.
 
 > Warning! This file may be overwritten at run time. Things that can
 > change are currently limited to the resetUrls and screens, which are

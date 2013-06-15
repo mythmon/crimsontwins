@@ -1,0 +1,23 @@
+<h1>Select a screen</h1>
+
+<ul class="selectors">
+  {% for s in screens %}
+    <li class="preview screen">
+      <h2>{{ s.name }}</h2>
+      <div class="content">
+
+        {% if not s.content %}
+          <div></div>
+        {% elif s.content.type == 'url' %}
+          <iframe sandbox="allow-same-origin allow-scripts allow-forms"
+                  src="{{ s.content.url }}" />
+        {% elif s.content.type == 'image' %}
+          <div class="imgbg" style="background-image: url({{ s.content.url }});"></div>
+        {% elif s.content.type == 'html' %}
+          {{ s.content.html }}
+        {% endif %}
+
+      </div>
+    </li>
+  {% endfor %}
+</ul>

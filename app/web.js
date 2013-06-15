@@ -4,87 +4,60 @@ var path = require('path');
 
 var express = require('express');
 var nib = require('nib');
+var nunjucks = require('nunjucks');
 var socketio = require('socket.io');
 var stylus = require('stylus');
 
+var api = require('./api');
 var config = require('./config');
 var manager = require('./manager');
 var utils = require('./utils');
 
-var screenManager = new manager.ScreenManager();
-var contentManager = screenManager.contentManager;
-var app = express();
 
+var app = express();
 app.set('port', config.web.port);
 
-// === Views ===
+// Nunjucks
+var tmplLoader = new nunjucks.FileSystemLoader(utils.appPath('templates'));
+var env = new nunjucks.Environment(tmplLoader);
+env.express(app);
 
-app.get('/api/ping', function(req, res) {
-  res.status(200);
-  res.end('pong');
-});
+var screenManager = new manager.ScreenManager();
+var contentManager = screenManager.contentManager;
 
-app.post('/api/reset', function(req, res) {
-  var screenName = req.query.screen || undefined;
-
-  screenManager.reset(screenName);
-
-  res.status(204);
-  res.end();
-});
-
-app.post('/api/sendurl', function(req, res) {
-  var p;
-  var url = req.query.url;
-  var screenName = req.query.screen;
-
-  if (!url) {
-    res.json(400, {error: 'URL is required.'});
-    return;
-  }
-
-  p = screenManager.sendUrl(url, screenName);
-  p.then(
-    function(obj) {
-      res.json(200, obj);
-    },
-    function(obj) {
-      var status = obj.error || 500;
-      res.json(status, obj);
-    }
-  );
-});
-
-app.get('/api/config', function(req, res) {
-  res.end(JSON.stringify(config, null, true));
-});
-
-app.get('/api/staticpath', function(req, res) {
-  res.end(path.normalize(__dirname + '/../static'));
-});
-
-app.get('/api/env', function(req, res) {
-  res.end(JSON.stringify(process.env));
-});
 
 // === Static files ===
 
-var staticPath = path.normalize(__dirname + '/../static');
+// Normal static files
+app.use(express.static(utils.appPath('static')));
 
 // Stylus
 app.use(stylus.middleware({
-  src: staticPath,
+  src: utils.appPath('static'),
+  force: config.debug,
   compile: function(str, path) {
     return stylus(str)
       .set('filename', path)
-      .set('compress', true)
-      .use(nib);
+      .set('compress', !config.debug)
+      .use(nib());
   }
 }));
 
-// Normal static files
-app.use(express.static(staticPath));
+// Nunjucks needs to be able to access templates in development.
+if (config.debug) {
+  app.use('/templates', express.static(utils.appPath('templates')));
+}
 
+// Define a shortcut if you want
+var env = nunjucks.env;
+// === Views ===
+
+api.setup(app, screenManager);
+
+// Fall back just serves the primary view.
+app.use(function(res, req, next) {
+  req.render('base.html');
+});
 
 // === Socket.IO ===
 
@@ -129,3 +102,5 @@ exports.start = start;
 exports.screenManager = screenManager;
 exports.contentManager = contentManager;
 
+
+var utils = require('./utils');

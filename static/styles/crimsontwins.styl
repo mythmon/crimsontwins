@@ -1,20 +1,20 @@
+@import 'nib';
+
 .content {
   transition: opacity 2s;
-  -moz-transition: opacity 2s;
-  -webkit-transition: opacity 2s;
 
   .imgbg {
-    background-size: contain;
-    background-repeat: no-repeat;
     background-position: center center;
-    width: 100%;
+    background-repeat: no-repeat;
+    background-size: contain;
     height: 100%;
+    width: 100%;
   }
 
   iframe {
-    overflow: hidden;
-    border: 0;
     background: #fff;
+    border: 0;
+    overflow: hidden;
   }
 }
 
@@ -29,20 +29,20 @@
   z-index: 2;
 
   .content {
-    width: 100%;
     height: calc(100% - 3em);
+    width: 100%;
 
     iframe {
-      width: 100%;
       height: 100%;
+      width: 100%;
     }
   }
 
   .meta {
     background: #000;
+    color: #fff;
     font-size: 2em;
     line-height: 1em;
-    color: #fff;
     padding: 0.25em;
     vertical-align: middle;
     word-wrap: break-word;
@@ -59,21 +59,21 @@
   }
 }
 
-.selector {
+.selectors {
   list-style: none;
   margin: 0;
   padding: 0;
 
   .preview {
-    position: relative;
     display: inline-block;
     margin: 10px;
+    position: relative;
 
-    h1 {
-      font-size: 1em;
-      margin: 0;
+    h2 {
       background: #444;
       color: #fff;
+      font-size: 1em;
+      margin: 0;
       text-align: center;
 
       button.close {
@@ -82,11 +82,11 @@
     }
 
     .content {
+      background: url(/img/debut_dark.png);
+      border: 1px solid #555;
+      height: 180px;
       position: relative;
       width: 240px;
-      height: 180px;
-      border: 1px solid #555;
-      background: url(/img/debut_dark.png);
 
       > i {
         display: block;
@@ -98,29 +98,31 @@
 
       &:hover {
         > i {
-          color: #5B5;
           border-color: #5B5;
+          color: #5B5;
         }
       }
 
       iframe {
-        transform-origin: 0, 0;
+        bottom: 0;
+        height: 500%;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform-origin: 0 0;
         transform: scale(0.2);
         width: 500%;
-        height: 500%;
-        position: absolute;
-        pointer-events: none;
       }
     }
 
     .click-target {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10;
+      absolute: top left;
       cursor: pointer;
+      height: 100%;
+      width: 100%;
+      z-index: 10;
     }
   }
 }
@@ -130,15 +132,15 @@ i {
   font-family: Arial, sans-serif;
 
   &.add {
-    color: #ABA;
-    border: 4px solid #ABA;
     border-radius: 32px;
-    width: 32px;
-    height: 32px;
+    border: 4px solid #ABA;
+    color: #ABA;
     font-size: 42px;
+    font-weight: bold;
+    height: 32px;
     line-height: 35px;
     text-align: center;
-    font-weight: bold;
+    width: 32px;
 
     &:before {
       content: "+";
@@ -147,19 +149,17 @@ i {
   }
 
   &.hydra {
-    color: #ABA;
     border: 6px solid #ABA;
-    width: 32px;
-    height: 32px;
+    color: #ABA;
     font-size: 68px;
+    height: 32px;
     line-height: 40px;
     text-align: center;
+    width: 32px;
 
     &:before {
+      absolute: top -3px left -7px;
       content: "+";
-      position: absolute;
-      top: -3px;
-      left: -7px;
     }
   }
 }
@@ -171,12 +171,10 @@ button.close {
 
 #connection-status {
   background: #000;
-  bottom: 10px;
   color: #fff;
+  fixed: bottom 10px right 10px;
   font-size: 1.2em;
   opacity: 0.99;
   padding: 5px;
-  position: fixed;
-  right: 10px;
   z-index: 3;
 }

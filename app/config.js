@@ -1,4 +1,4 @@
-var fs = require('fs');
+ fs = require('fs');
 var path = require('path');
 
 var _ = require('lodash');
@@ -12,7 +12,8 @@ var defaults = {
   },
   resetTime: 60000,
   resetUrls: [],
-  io: {}
+  io: {},
+  debug: false
 };
 
 var existsSync = fs.existsSync || path.existsSync;
