@@ -1,0 +1,11 @@
+{% from "macros.html" import elementFor %}
+
+<div class="overlay screen" name="{{ screen.name }}">
+  <div class="content">
+    {{ elementFor(screen.content) }}
+  </div>
+  <div class="meta">
+    <span class="name">{{ screen.name }}</span>
+    <span class="url">{{ screen.content.url }}</span>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Crimson Twins</title>
+
+  {% block styles %}
+    <link rel="stylesheet" type="text/css" href="/styles/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/styles/crimsontwins.css">
+  {% endblock %}
+</head>
+
+<body data-rendered="{{ rendered }}">
+  <div class="wrap">
+    {% block body %}{% endblock %}
+  </div>
+
+  {% block scripts %}
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/lib/jquery-1.8.2.min.js"></script>
+    <script src="/js/lib/underscore-1.4.2.min.js"></script>
+    <script src="/js/lib/nunjucks-dev.js"></script>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/base.js"></script>
+  {% endblock %}
+</body>
+
+</html>

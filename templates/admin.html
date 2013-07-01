@@ -1,0 +1,13 @@
+<div class="content-ui">
+  <h2>Default Content</h2>
+  <ul>
+    {% for c in defaultContent %}
+      <li class="content-row">
+        <button class="remove">Remove</button>
+        <input type="text" name="url" value="{url}" />
+      </li>
+    {% endfor %}
+  </ul>
+  <button class="add">Add</button>
+  <button class="save">Save</button>
+</div>

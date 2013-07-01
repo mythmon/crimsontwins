@@ -1,6 +1,5 @@
 var _ = require('lodash');
-
-var utils = require('./utils');
+var path = require('path');
 
 exports.async = function async(func, args) {
   if (typeof func !== 'function') return;
@@ -65,4 +64,8 @@ exports.eventRelay = function(from, to, name) {
     args = [name].concat(args);
     to.emit.apply(to, args);
   });
+};
+
+exports.appPath = function(p) {
+  return path.normalize(__dirname + '/../' + p);
 };

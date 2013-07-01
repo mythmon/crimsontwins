@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="/js/selectors.js"></script>
+{% endblock %}
+
+{% block body %}
+  <h1>Select a screen to view</h1>
+
+  <ul class="selectors"></ul>
+{% endblock %}

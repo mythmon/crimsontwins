@@ -1,0 +1,8 @@
+{% from "macros.html" import elementFor %}
+
+<li class="preview screen" name="{{ screen.name }}">
+  <h2>{{ screen.name }}</h2>
+  <div class="content">
+    {{ elementFor(screen.content) }}
+  </div>
+</li>

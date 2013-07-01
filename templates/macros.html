@@ -1,0 +1,20 @@
+{% macro elementFor(content) %}
+  {% if not content %}
+    <div></div>
+
+  {% elif content.type == 'url' %}
+    <iframe src="{{ content.url }}"
+            sandbox="allow-same-origin allow-scripts allow-forms">
+    </iframe>
+
+  {% elif content.type == 'image' %}
+    <div class="imgbg" style="background-image: url({{ content.url }});"></div>
+
+  {% elif content.type == 'html' %}
+    {{ content.html }}
+
+  {% else %}
+    <div></div>
+
+  {% endif %}
+{% endmacro %}
