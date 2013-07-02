@@ -1,48 +1,53 @@
 (function() {
 
-function pageInit() {
-  makeSelectors();
-}
+window.ct = window.ct || {};
 
 
-function makeSelectors() {
-  var $selectors = $('.selectors');
-  console.log($selectors);
+ct.Selectors = function(opts) {
+  this.elem = opts.elem;
+  this.events();
+};
 
+ct.Selectors.prototype.getData = function() {
+  // Check for an outstanding reqeuest.
+  if (this._data) {
+    return this._data;
+  }
+  var d = this._data = $.Deferred();
+
+  var self = this;
   ct.socket.emit('getScreens', null, function(screens) {
-    console.log('screens', screens);
+    d.resolve(screens);
+    this._data = null;
+  });
+
+  return this._data;
+};
+
+ct.Selectors.prototype.render = function() {
+  var self = this;
+  var html, $selector;
+  this.getData().then(function(screens) {
     _.each(screens, function(screen) {
-      console.log(screen.name);
-      var selector = ct.template('/fragments/screen_selector.html', {
+      var html = ct.template('/fragments/screen_selector.html', {
         screen: screen
       });
-      $selectors.append($(selector).data('screen', screen));
+      $selector = $(html).data('screen', screen);
+      self.elem.append($selector);
     });
-
-    /*
-    $selectors.append(makeScreenPreview({
-        name: 'Hydra mode',
-        content: {type: 'html', html: '<i class="hydra">'}
-      }, false)
-      .addClass('meta')
-      .on('click', function(ev) {
-        ev.preventDefault();
-        console.log('hyrda clicked');
-      }));
-    */
-
   });
+};
 
-
-  $selectors.on('click', '.preview.screen .content', function(ev) {
+ct.Selectors.prototype.events = function() {
+  var self = this;
+  this.elem.on('click', '.preview.screen .content', function(ev) {
     ev.preventDefault();
-    selectScreen($(this).parent().data('screen'));
+    self.selectScreen($(this).parent().data('screen'));
     return false;
   });
-}
+};
 
-
-function selectScreen(screen) {
+ct.Selectors.prototype.selectScreen = function(screen) {
   var selector = ct.template('fragments/full_screen_content.html', {
     screen: screen
   });
@@ -52,6 +57,9 @@ function selectScreen(screen) {
   window.history.pushState({screen: screen}, screen.name, hash);
 }
 
-$(pageInit);
+
+var sel = new ct.Selectors({elem: $('.selectors')});
+sel.getData();
+$(sel.render.bind(sel));
 
 })();
