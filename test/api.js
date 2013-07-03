@@ -10,9 +10,10 @@ var web = require('../app/web');
 
 describe('api', function() {
 
-  beforeEach(function() {
+  beforeEach(function(done) {
     web.screenManager.index = 0;
     web.contentManager.index = 0;
+    web.contentManager.load().then(function() { done(); });
   });
 
   describe('ping', function(done) {
@@ -64,6 +65,28 @@ describe('api', function() {
       web.screenManager.once('screenChanged', function(screen) {
         assert.equal(screen.name, 'screen2');
         done();
+      });
+
+      supertest(web.app)
+        .post(url)
+        .expect(200, function(err) {
+          if (err) {
+            done(err);
+          }
+        });
+    });
+
+    it('should accept a timeout', function(done) {
+      var targetUrl = 'http://example.com/giraffe.gif';
+      var url = '/api/sendurl?timeout=50&url=' + targetUrl;
+
+      web.screenManager.once('screenChanged', function firstChange(screen) {
+        assert.equal(screen.content.url, targetUrl);
+
+        web.screenManager.once('screenChanged', function secondChange(screen) {
+          assert.notEqual(screen.content.url, targetUrl);
+          done();
+        });
       });
 
       supertest(web.app)

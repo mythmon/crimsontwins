@@ -96,7 +96,7 @@ ScreenManager.prototype.next = function() {
   return screen;
 };
 
-ScreenManager.prototype.sendUrl = function(url, screenName) {
+ScreenManager.prototype.sendUrl = function(url, screenName, timeout) {
   var p = new promise.Promise();
   var self = this;
 
@@ -110,7 +110,7 @@ ScreenManager.prototype.sendUrl = function(url, screenName) {
 
       _.each(screens, function(screen) {
         screen.content = content;
-        self.makeTimeout(screen.name);
+        self.makeTimeout(screen.name, timeout);
         self.emit('screenChanged', screen);
       });
 
@@ -151,6 +151,8 @@ ScreenManager.prototype.cycleScreen = function(name) {
   });
 };
 
+/* Set a timeout to change a screen named `name` to a default url in
+ * time` milliseconds. */
 ScreenManager.prototype.makeTimeout = function(name, time) {
   var oldTimeout = this.timeouts[name];
   if (arguments.length < 2) {

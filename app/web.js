@@ -31,17 +31,16 @@ app.post('/api/reset', function(req, res) {
 });
 
 app.post('/api/sendurl', function(req, res) {
-  var p;
   var url = req.query.url;
   var screenName = req.query.screen;
+  var timeout = parseInt(req.query.timeout);
 
   if (!url) {
     res.json(400, {error: 'URL is required.'});
     return;
   }
 
-  p = screenManager.sendUrl(url, screenName);
-  p.then(
+  screenManager.sendUrl(url, screenName, timeout).then(
     function(obj) {
       res.json(200, obj);
     },

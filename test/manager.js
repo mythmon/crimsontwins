@@ -186,9 +186,9 @@ describe('ScreenManager', function() {
 
   describe('#cycleScreen', function() {
     beforeEach(function(done) {
-      screenMan.contentManager.load().then(function() {
-        done();
-      });
+      // done can't take any arguments, and the load promise will pass
+      // one, which is why there is a function wrapper here.
+      screenMan.contentManager.load().then(function() { done(); });
     });
 
     it('should change the right screen', function() {
@@ -205,6 +205,8 @@ describe('ScreenManager', function() {
     var clock;
 
     beforeEach(function(done) {
+      // done can't take any arguments, and the load promise will pass
+      // one, which is why there is a function wrapper here.
       screenMan.contentManager.load().then(function() {
         done();
       });
@@ -306,6 +308,21 @@ describe('ScreenManager', function() {
         });
 
         done();
+      });
+    });
+
+    it('should accept timeouts', function(done) {
+      var url = 'http://example.com/dealwithit.gif';
+
+      screenMan.sendUrl(url, 'screen1', 50).then(function() {
+        assert.equal(screenMan.screens[0].content.url, url);
+
+        // This is horrible, I know. But async mocha tests and Sinon's fake
+        // timers don't work together.
+        setTimeout(function() {
+          assert.notEqual(screenMan.screens[0].content.url, url);
+          done();
+        }, 100);
       });
     });
 
