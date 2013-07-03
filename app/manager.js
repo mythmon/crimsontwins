@@ -155,7 +155,7 @@ ScreenManager.prototype.cycleScreen = function(name) {
  * time` milliseconds. */
 ScreenManager.prototype.makeTimeout = function(name, time) {
   var oldTimeout = this.timeouts[name];
-  if (arguments.length < 2) {
+  if (time === undefined || isNaN(time)) {
     time = config.resetTime;
   }
 
