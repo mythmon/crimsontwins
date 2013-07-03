@@ -34,6 +34,9 @@ app.post('/api/sendurl', function(req, res) {
   var url = req.query.url;
   var screenName = req.query.screen;
   var timeout = parseInt(req.query.timeout);
+  if (isNaN(timeout)) {
+    timeout = undefined;
+  }
 
   if (!url) {
     res.json(400, {error: 'URL is required.'});
