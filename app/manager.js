@@ -292,6 +292,8 @@ ContentManager.prototype.contentForUrl = function(url) {
     path: path
   };
 
+  utils.proxify(options, urlParts.scheme === 'https');
+
   req = proto.request(options, function success(res) {
     var contentType, headers = {}, xframe;
     var content = {

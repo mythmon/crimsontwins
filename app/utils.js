@@ -1,5 +1,7 @@
 var _ = require('lodash');
+var uri = require('uri-js');
 
+var config = require('./config');
 var utils = require('./utils');
 
 exports.async = function async(func, args) {
@@ -66,3 +68,39 @@ exports.eventRelay = function(from, to, name) {
     to.emit.apply(to, args);
   });
 };
+
+/* If an http/https proxy is configured, this will transform a request
+ * options object to use it. */
+exports.proxify = function(options, https, proxy) {
+  if (proxy === undefined) {
+    if (https) {
+      proxy = config.https_proxy;
+    } else {
+      proxy = config.http_proxy;
+    }
+  }
+
+  if (proxy === undefined) {
+    options.proxied = false;
+    return options;
+  }
+
+  try {
+    proxy = uri.parse(proxy);
+  } catch(e) {
+    console.log('Error parsing proxy settings. Proxy settings should be something like "proxy.example.com:1234".')
+    console.log(JSON.stringify(e));
+    process.exit(1);
+  }
+
+  var proto = https ? 'https' : 'http'
+  var port = options.port || (https ? 443 : 80);
+  options.path = proto + '://' + options.host + ':' + port + options.path;
+  options.host = proxy.host;
+  options.port = proxy.port || (https ? 443 : 80);
+  options.proxied = true;
+
+  options.host = proxy.host;
+
+  return options;
+}

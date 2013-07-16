@@ -45,7 +45,10 @@ function configFromEnv() {
     web: {}
   };
 
+  // Special environment variables to list for.
   config.web.port = process.env.PORT;
+  config.http_proxy = process.env.HTTP_PROXY || process.env.http_proxy;
+  config.https_proxy = process.env.HTTP_PROXY || process.env.http_proxy || config.http_proxy;
 
   for (key in process.env) {
     if (key.indexOf('CT_') === 0) {
