@@ -33,7 +33,7 @@ cd crimsontwins
 npm install
 cp config.json-dist cp config.json
 vi config.json
-sudo node crimsontwins.js # sudo needed to bind ports
+node crimsontwins.js
 ```
 
 Requirements
@@ -72,8 +72,9 @@ The main file is `crimsontwins.js`. Run that like
 > node crimsontwins.js
 ```
 
-If you encounter `warn  - error raised: Error: listen EACCES` you may need to
-escalate privileges of the user running the account and execute it as:
+If you encounter `warn  - error raised: Error: listen EACCES`, you probably
+set a port you don't have access to listen on, such as ports below 1024. You
+may need to escalate privileges of the user running the account and execute it as:
 
 ```shell
 > sudo node crimsontwins.js
@@ -111,8 +112,11 @@ Run
 Here's an example:
 
 ```shell
-> CT_IRC_SERVER=irc.server.org CT_IRC_NICK=crimsontwins \
-  CT_IRC_CHANNELS=#foo,#bar CT_API_URL=http://myct.example.com node ext/chat.js
+> export CT_IRC_SERVER=irc.server.org
+> export CT_IRC_NICK=crimsontwins
+> export CT_IRC_CHANNELS='#foo,#bar'
+> export CT_API_URL=http://myct.example.com
+> node ext/chat.js
 ```
 
 API
@@ -121,9 +125,11 @@ API
 Your CrimsonTwins instance will expose an API that can be directly queried by
 external tools and services.
 
-`GET /api/sendurl`
+`GET /api/ping`
 
 Returns "pong". Useful as a heartbeat monitor or general sanity check.
+
+---
 
 `POST /api/sendurl`
 ```
@@ -135,14 +141,23 @@ params: timeout    - an integer for how long to keep this on the page
 
 Send a particular url to a particular CT screen
 
+---
+
 `GET /api/config`
 
 Returns the current configuration of the server.
+This is probably onl useful for debugging.
+
+---
 
 `GET /api/staticpath`
 
-Returns the path of crimsontwins's static assets
+Returns the file system path of crimsontwins's static assets.
+This is probably onl useful for debugging.
+
+---
 
 `GET /api/env`
 
-Returns the crimsontwin's process environment
+Returns the crimsontwin's process environment.
+This is probably onl useful for debugging.
