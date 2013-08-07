@@ -23,8 +23,18 @@ monitor.
 Installation
 ============
 
-Crimsontwins is a Node.js application. That should tell you a lot about how to
-run it.
+CrimsonTwins is a node app, so you'll need a copy of node in your path. Pull
+down the repo, install dependencies with npm, edit your configuration, and start
+the process. The whole process looks like:
+
+```shell
+git checkout git@github.com:mythmon/crimsontwins.git
+cd crimsontwins
+npm install
+cp config.json-dist cp config.json
+vi config.json
+sudo node crimsontwins.js # sudo needed to bind ports
+```
 
 Requirements
 ------------
@@ -62,19 +72,27 @@ The main file is `crimsontwins.js`. Run that like
 > node crimsontwins.js
 ```
 
+If you encounter `warn  - error raised: Error: listen EACCES` you may need to
+escalate privileges of the user running the account and execute it as:
+
+```shell
+> sudo node crimsontwins.js
+```
+
 You should now have a running crimsontwins instance.
 
 Development
 ===========
 
-Make a feature branch and hack away. When you're ready, open a pull request. Use `make test` to run tests locally.
-
+Make a feature branch and hack away. When you're ready, open a pull request.
+Use `make test` to run tests locally.
 
 Running the IRC bot
 ===================
 
-The bot is a separate Node.js app, located at /ext/chat.js. It might
-eventually graduate to its own repo, but it's bundled for now.
+We've bundled an IRC bot for issuing commands to the server. The bot is a
+separate Node.js app, located at `/ext/chat.js`, and is not required to run or
+use the crimsontwins server. It may eventually graduate to its own repo.
 
 Configuration
 -------------
@@ -96,3 +114,35 @@ Here's an example:
 > CT_IRC_SERVER=irc.server.org CT_IRC_NICK=crimsontwins \
   CT_IRC_CHANNELS=#foo,#bar CT_API_URL=http://myct.example.com node ext/chat.js
 ```
+
+API
+---
+
+Your CrimsonTwins instance will expose an API that can be directly queried by
+external tools and services.
+
+`GET /api/sendurl`
+
+Returns "pong". Useful as a heartbeat monitor or general sanity check.
+
+`POST /api/sendurl`
+```
+params: timeout    - an integer for how long to keep this on the page
+        screenName - the name of the screen that should display the content
+                     (optional)
+        url        - the url to display (http and all)
+```
+
+Send a particular url to a particular CT screen
+
+`GET /api/config`
+
+Returns the current configuration of the server.
+
+`GET /api/staticpath`
+
+Returns the path of crimsontwins's static assets
+
+`GET /api/env`
+
+Returns the crimsontwin's process environment
