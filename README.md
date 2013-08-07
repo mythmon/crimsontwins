@@ -114,3 +114,35 @@ Here's an example:
 > CT_IRC_SERVER=irc.server.org CT_IRC_NICK=crimsontwins \
   CT_IRC_CHANNELS=#foo,#bar CT_API_URL=http://myct.example.com node ext/chat.js
 ```
+
+API
+---
+
+Your CrimsonTwins instance will expose an API that can be directly queried by
+external tools and services.
+
+`GET /api/sendurl`
+
+Returns "pong". Useful as a heartbeat monitor or general sanity check.
+
+`POST /api/sendurl`
+```
+params: timeout    - an integer for how long to keep this on the page
+        screenName - the name of the screen that should display the content
+                     (optional)
+        url        - the url to display (http and all)
+```
+
+Send a particular url to a particular CT screen
+
+`GET /api/config`
+
+Returns the current configuration of the server.
+
+`GET /api/staticpath`
+
+Returns the path of crimsontwins's static assets
+
+`GET /api/env`
+
+Returns the crimsontwin's process environment
