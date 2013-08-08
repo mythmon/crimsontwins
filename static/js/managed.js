@@ -18,6 +18,7 @@ function init() {
   makeSelectors();
   makeAdmin();
   makeConnectionStatus();
+  makeFullScreen();
 }
 
 // When all readyParts are reported as ready, call init().
@@ -167,6 +168,7 @@ var adminTemplate =
       '<button class="add">Add</button>' +
       '<button class="save">Save</button>' +
     '</div>' +
+    '<p>Press F after selecting a screen for full screen mode.</p>' +
   '</div>';
 
 var contentRowTemplate =
@@ -213,6 +215,23 @@ function makeConnectionStatus() {
     .text('No connection')
     .attr('id', 'connection-status')
     .appendTo('body');
+}
+
+function makeFullScreen() {
+  function requestFullscreen(elem) {
+    (elem.requestFullscreen ||
+     elem.mozRequestFullScreen ||
+     elem.webkitRequestFullScreen).call(elem, Element.ALLOW_KEYBOARD_INPUT);
+  }
+
+  $(document).on('keydown', function(e) {
+    if (e.keyCode === 70) {
+      var elem = $('.overlay')[0];
+      if (elem) {
+        requestFullscreen(elem);
+      }
+    }
+  });
 }
 
 window.onpopstate = function(ev) {
