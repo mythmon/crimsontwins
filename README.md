@@ -28,7 +28,7 @@ down the repo, install dependencies with npm, edit your configuration, and start
 the process. The whole process looks like:
 
 ```shell
-git checkout git@github.com:mythmon/crimsontwins.git
+git clone https://github.com/mythmon/crimsontwins.git
 cd crimsontwins
 npm install
 cp config.json-dist cp config.json
@@ -106,6 +106,8 @@ set some environment variables:
 * `CT_IRC_CHANNELS` - comma-separated list of IRC channels
 * `CT_API_URL` - Crimsontwins URL
 
+If your IRC server requires a password, set `CT_IRC_SERVER_PASSWORD` as well.
+
 Run
 ---
 
@@ -146,18 +148,18 @@ Send a particular url to a particular CT screen
 `GET /api/config`
 
 Returns the current configuration of the server.
-This is probably onl useful for debugging.
+This is probably only useful for debugging.
 
 ---
 
 `GET /api/staticpath`
 
 Returns the file system path of crimsontwins's static assets.
-This is probably onl useful for debugging.
+This is probably only useful for debugging.
 
 ---
 
 `GET /api/env`
 
 Returns the crimsontwin's process environment.
-This is probably onl useful for debugging.
+This is probably only useful for debugging.
