@@ -22,11 +22,11 @@ var querystring = require('querystring');
 
 var config = {
   server: process.env.CT_IRC_SERVER,
+  password: process.env.CT_IRC_SERVER_PASSWORD,
   nick: process.env.CT_IRC_NICK,
   channels: process.env.CT_IRC_CHANNELS.split(','),
   apiUrl: process.env.CT_API_URL
 };
-
 
 function api(method, url, query, cb) {
   var key, opts, res;
@@ -47,9 +47,13 @@ function api(method, url, query, cb) {
 
 
 // IRC Bot
-var ircClient = new irc.Client(config.server, config.nick, {
+var ircClientOptions = {
   channels: config.channels
-});
+};
+if (config.password != undefined) {
+    ircClientOptions.password = config.password;
+}
+var ircClient = new irc.Client(config.server, config.nick, ircClientOptions);
 
 // On connected to IRC server
 ircClient.on('registered', function(message) {
